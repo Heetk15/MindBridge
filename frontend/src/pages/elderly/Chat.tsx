@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   FiSend,
+  FiArrowLeft,
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChatStore } from '../../store/chatStore'
@@ -8,6 +10,7 @@ import ChatMessage from '../../components/Chatbot/ChatMessage'
 import VoiceRecorder from '../../components/Chatbot/VoiceRecorder'
 
 function ChatbotPage() {
+  const navigate = useNavigate()
   const {
     messages,
     isTyping,
@@ -63,14 +66,23 @@ function ChatbotPage() {
       <div className="flex-1 flex flex-col h-full max-w-5xl mx-auto border-x border-border/50 bg-card/30 backdrop-blur-sm">
         {/* Header */}
         <header className="bg-card/50 backdrop-blur-md border-b border-border/50 px-8 py-6 flex items-center justify-between sticky top-0 z-10">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground font-display flex items-center gap-2">
-              <span className="w-2 h-8 bg-primary rounded-full" />
-              MindBridge Chat
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {messages.length} messages in this session
-            </p>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-secondary rounded-lg transition-all text-foreground hover:text-primary flex items-center justify-center"
+              title="Go back"
+            >
+              <FiArrowLeft size={24} />
+            </button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground font-display flex items-center gap-2">
+                <span className="w-2 h-8 bg-primary rounded-full" />
+                MindBridge Chat
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                {messages.length} messages in this session
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {messages.length > 0 && (
