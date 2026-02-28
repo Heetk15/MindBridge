@@ -13,12 +13,24 @@ class ChatbotService {
     }
 
     try {
+      // Retrieve relevant context from knowledge base
+      const relevantDocs = await RAGService.search(message, 3)
+
+      let contextualPrompt = message
+      if (relevantDocs && relevantDocs.length > 0) {
+        const contextText = relevantDocs
+          .map((doc) => `- ${doc.content.substring(0, 150)}...`)
+          .join('\n')
+
+        contextualPrompt = `Based on the following relevant information:\n${contextText}\n\nUser question: ${message}`
+      }
+
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           contents: [
             {
-              parts: [{ text: message }],
+              parts: [{ text: contextualPrompt }],
             },
           ],
           generationConfig: {
@@ -43,6 +55,7 @@ class ChatbotService {
       return {
         reply,
         model: 'gemini',
+        context: relevantDocs || [],
         tokens: response.data?.usageMetadata || {},
       }
     } catch (error) {
@@ -69,14 +82,14 @@ class ChatbotService {
     try {
       // Retrieve relevant context from knowledge base
       const relevantDocs = await RAGService.search(message, 3)
-      
+
       let contextualPrompt = message
       if (relevantDocs && relevantDocs.length > 0) {
-        const context = relevantDocs
+        const contextText = relevantDocs
           .map((doc) => `- ${doc.content.substring(0, 150)}...`)
           .join('\n')
-        
-        contextualPrompt = `Based on the following relevant information:\n${context}\n\nUser question: ${message}`
+
+        contextualPrompt = `Based on the following relevant information:\n${contextText}\n\nUser question: ${message}`
       }
 
       const systemPrompt = `You are a helpful, compassionate AI assistant for elderly users. You have access to a knowledge base with information about health, wellness, family relationships, and daily life guidance. Be kind, patient, and provide clear, easy-to-understand responses. Speak in a warm and friendly tone. When relevant, refer to specific information from the knowledge base to provide personalized and accurate advice.`
@@ -116,6 +129,7 @@ class ChatbotService {
       return {
         reply,
         model: 'groq',
+        context: relevantDocs || [],
         tokens: response.data?.usage || {},
       }
     } catch (error) {
@@ -137,7 +151,7 @@ class ChatbotService {
    */
   static isConfigured() {
     const model = this.getConfiguredModel()
-    
+
     if (model === 'gemini' && !process.env.GEMINI_API_KEY) {
       return false
     }

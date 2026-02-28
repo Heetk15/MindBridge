@@ -18,6 +18,7 @@ app.use(cors({
       'http://localhost:5175',
       'http://localhost:3000',
       'http://localhost:8080',
+      'http://localhost:8081',
       process.env.CLIENT_URL
     ]
     if (!origin || allowedOrigins.includes(origin)) {

@@ -4,6 +4,8 @@ export interface ChatMessage {
   text: string;
   timestamp: Date;
   mood?: string;
+  status?: 'sending' | 'sent' | 'error';
+  context?: any[];
 }
 
 export interface Conversation {

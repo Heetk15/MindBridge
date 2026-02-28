@@ -1,5 +1,6 @@
 const chromaDB = require('./ChromaDBService')
 const chromaConfig = require('../config/chromadb')
+const QueryExpansionService = require('./QueryExpansionService')
 
 /**
  * RAG Retrieval Service
@@ -8,7 +9,7 @@ const chromaConfig = require('../config/chromadb')
 
 class RAGService {
   /**
-   * Search for relevant documents
+   * Search for relevant documents with query expansion
    * @param {string} query - Search query
    * @param {Number} topK - Number of results to return
    * @returns {Promise<Array>} Array of relevant documents
@@ -21,10 +22,13 @@ class RAGService {
         return []
       }
 
-      // Query ChromaDB
+      // Expand query with synonyms
+      const expandedQuery = QueryExpansionService.getExpandedQueryString(query)
+
+      // Query ChromaDB with expanded query
       const results = await collection.query({
-        query_texts: [query],
-        n_results: topK,
+        query_texts: [expandedQuery],
+        n_results: topK * 2, // Get more results to filter
       })
 
       if (!results || results.documents.length === 0) {
@@ -36,11 +40,37 @@ class RAGService {
       const distances = results.distances[0] || []
       const metadatas = results.metadatas[0] || []
 
-      return documents.map((doc, index) => ({
+      let formatted = documents.map((doc, index) => ({
         content: doc,
         similarity: 1 - distances[index], // Convert distance to similarity score
         metadata: metadatas[index],
       }))
+
+      // Secondary keyword filtering/boosting if semantic scores are too low
+      const keywords = QueryExpansionService.extractKeywords(query)
+      
+      formatted = formatted.map((doc) => {
+        // Count keyword matches in document
+        const keywordMatches = keywords.filter((keyword) =>
+          doc.content.toLowerCase().includes(keyword)
+        ).length
+
+        // Boost similarity score based on keyword matches
+        const boost = Math.min(keywordMatches * 0.05, 0.3) // Up to 0.3 boost
+        const boostedSimilarity = Math.min(doc.similarity + boost, 1.0)
+
+        return {
+          ...doc,
+          similarity: boostedSimilarity,
+          keywordHits: keywordMatches,
+        }
+      })
+
+      // Re-sort by boosted similarity
+      formatted.sort((a, b) => b.similarity - a.similarity)
+
+      // Return top K
+      return formatted.slice(0, topK)
     } catch (error) {
       console.error('❌ RAG search failed:', error.message)
       return []
@@ -61,20 +91,23 @@ class RAGService {
         return null
       }
 
-      // Filter by similarity threshold
+      // Lowered threshold from 0.7 to 0.25 for better recall
       const relevantDocs = documents.filter(
-        doc => doc.similarity >= chromaConfig.searchSettings.similarityThreshold
+        doc => doc.similarity >= 0.25
       )
 
       if (relevantDocs.length === 0) {
         return null
       }
 
-      // Build context string
+      // Build context string with better formatting
       let context = 'Based on the following knowledge base information:\n\n'
 
       relevantDocs.forEach((doc, index) => {
-        context += `[Document ${index + 1} - Confidence: ${(doc.similarity * 100).toFixed(1)}%]\n`
+        const confidence = (doc.similarity * 100).toFixed(1)
+        const keywordNote = doc.keywordHits > 0 ? ` | Keyword Matches: ${doc.keywordHits}` : ''
+        
+        context += `[Document ${index + 1} - Confidence: ${confidence}%${keywordNote}]\n`
         context += `${doc.content}\n`
         if (doc.metadata.source) {
           context += `(Source: ${doc.metadata.source})\n`

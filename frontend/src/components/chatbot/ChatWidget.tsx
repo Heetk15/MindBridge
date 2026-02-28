@@ -1,71 +1,110 @@
-import { useState, useRef, useEffect } from 'react';
-import { useChatStore } from '@/store/chatStore';
-import ChatMessage from './ChatMessage';
-import VoiceRecorder from './VoiceRecorder';
-import MoodIndicator from './MoodIndicator';
-import { Send } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState } from 'react'
+import { FiMessageCircle, FiSend } from 'react-icons/fi'
 
-const ChatWidget = () => {
-  const { messages, isTyping, sendMessage, sendVoiceMessage } = useChatStore();
-  const [input, setInput] = useState('');
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+function ChatWidget() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      sender: 'bot',
+      text: 'Hello! How can I help you today?',
+      time: new Date(Date.now() - 5004),
+    },
+  ])
+  const [input, setInput] = useState('')
 
   const handleSend = () => {
-    if (!input.trim()) return;
-    sendMessage(input);
-    setInput('');
-  };
+    if (input.trim()) {
+      setMessages([
+        ...messages,
+        {
+          id: messages.length + 1,
+          sender: 'user',
+          text: input,
+          time: new Date(),
+        },
+      ])
+      setInput('')
+      // Here you would send to backend
+    }
+  }
 
-  const handleVoiceAudio = (audioBase64: string) => {
-    sendVoiceMessage(audioBase64);
-  };
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 flex items-center justify-center z-40"
+        title="Open chat"
+      >
+        <FiMessageCircle size={24} />
+      </button>
+    )
+  }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-display font-bold text-foreground">AI Companion</h2>
-        <MoodIndicator mood="happy" />
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 glass-card mb-4 space-y-2">
-        {messages.map((m) => (
-          <ChatMessage key={m.id} sender={m.sender} text={m.text} />
-        ))}
-        {isTyping && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-1 px-5 py-3 bg-secondary rounded-2xl rounded-bl-md w-fit">
-            <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity }} className="w-2 h-2 bg-muted-foreground rounded-full" />
-            <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }} className="w-2 h-2 bg-muted-foreground rounded-full" />
-            <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }} className="w-2 h-2 bg-muted-foreground rounded-full" />
-          </motion.div>
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      <div className="flex gap-3 items-center">
-        <VoiceRecorder onTranscript={(t) => { setInput(t); }} onAudio={handleVoiceAudio} />
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type a message..."
-          className="flex-1 px-5 py-4 rounded-xl bg-card border border-border text-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          aria-label="Message input"
-        />
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleSend}
-          className="p-4 rounded-xl gradient-primary text-primary-foreground"
-          aria-label="Send message"
+    <div className="fixed bottom-6 right-6 w-96 h-[32rem] bg-card/95 backdrop-blur-xl rounded-3xl shadow-elevated border border-border/50 flex flex-col z-40 overflow-hidden animate-fade-in">
+      {/* Header */}
+      <div className="gradient-primary text-primary-foreground p-5 flex justify-between items-center shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center font-bold text-xs">MB</div>
+          <div>
+            <h3 className="font-bold text-sm leading-none">MindBridge Assistant</h3>
+            <p className="text-[10px] text-primary-foreground/70 mt-1 uppercase tracking-wider font-medium">Online & Ready</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsOpen(false)}
+          className="p-1.5 hover:bg-black/10 rounded-lg transition-colors text-2xl leading-none font-light"
         >
-          <Send size={22} />
-        </motion.button>
+          ×
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-auto p-6 space-y-4 bg-background/50 scrollbar-thin">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+          >
+            <div
+              className={`max-w-[85%] px-4 py-2.5 rounded-2xl shadow-sm text-sm font-medium ${msg.sender === 'user'
+                  ? 'bg-primary text-primary-foreground rounded-br-none'
+                  : 'bg-secondary text-foreground rounded-bl-none border border-border/30'
+                }`}
+            >
+              <p className="leading-relaxed">{msg.text}</p>
+              <div className={`mt-1.5 flex items-center gap-1.5 opacity-40 text-[9px] uppercase font-bold tracking-tighter ${msg.sender === 'user' ? 'text-primary-foreground' : 'text-muted-foreground'
+                }`}>
+                {msg.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div className="p-4 bg-card/80 backdrop-blur-md border-t border-border/30">
+        <div className="flex gap-2 bg-secondary/50 p-2 rounded-2xl border border-border/30 group focus-within:border-primary/30 transition-all">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Type a message..."
+            className="flex-1 px-3 py-2 bg-transparent outline-none text-sm placeholder:text-muted-foreground/50"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim()}
+            className="gradient-primary text-primary-foreground p-2.5 rounded-xl hover:scale-105 active:scale-95 transition-all shadow-md disabled:grayscale disabled:opacity-30 disabled:scale-100"
+          >
+            <FiSend size={16} />
+          </button>
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ChatWidget;
+export default ChatWidget

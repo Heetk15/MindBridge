@@ -22,7 +22,11 @@ class DocumentIngestionService {
       const documents_text = []
       const metadatas = []
 
+      console.log(`\n📥 INGESTING ${documents.length} DOCUMENT(S)...`)
+
       for (const doc of documents) {
+        console.log(`  Processing: ${doc.metadata.source} (${doc.content.length} chars)`)
+        
         // Chunk the document
         const chunks = this.chunkText(doc.content)
 
@@ -40,6 +44,7 @@ class DocumentIngestionService {
       }
 
       // Add to ChromaDB
+      console.log(`  Adding ${ids.length} chunks to collection...`)
       await collection.add({
         ids,
         documents: documents_text,
@@ -79,7 +84,7 @@ class DocumentIngestionService {
     for (let i = 0; i < text.length; i += chunkSize - overlap) {
       chunks.push(text.substring(i, i + chunkSize))
     }
-
+    
     return chunks
   }
 

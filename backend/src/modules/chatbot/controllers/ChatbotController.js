@@ -38,6 +38,7 @@ class ChatbotController {
         conversationId,
         reply: result.reply,
         model: result.model,
+        context: result.context || [],
         metadata: {
           timestamp: new Date(),
           tokens: result.tokens,

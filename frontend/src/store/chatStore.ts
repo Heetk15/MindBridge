@@ -38,6 +38,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         text: aiText,
         timestamp: new Date(),
         mood: response.mood || 'caring',
+        context: response.context || [],
       };
       set((s) => ({ messages: [...s.messages, aiMsg], isTyping: false }));
     } catch (err: any) {
@@ -53,7 +54,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     try {
       const response = await chatService.sendVoiceMessage(audioBase64, conversationId);
 
-      const userText = response.transcript || "Voice message sent"; // fallback
+      const userText = response.transcript || response.transcription || "Voice message sent"; // fallback
       const userMsg: ChatMessage = { id: Date.now().toString(), sender: 'user', text: userText, timestamp: new Date() };
 
       const aiText = response.reply || response.text || response.message || 'Received voice response';
@@ -63,6 +64,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         text: aiText,
         timestamp: new Date(),
         mood: response.mood || 'caring',
+        context: response.context || [],
       };
 
       set((s) => ({ messages: [...s.messages, userMsg, aiMsg], isTyping: false }));
