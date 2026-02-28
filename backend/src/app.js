@@ -76,6 +76,9 @@ app.use('/api/v1/video', require('./modules/video/routes'))
 // app.use('/api/v1/prescriptions', require('./modules/prescriptions/routes'))  // ES module – needs conversion
 app.use('/api/chatbot', require('./modules/chatbot/routes'))
 app.use('/api/rag', require('./modules/rag/routes'))
+app.use('/api/v1/reminders', require('./modules/reminders/routes'))
+app.use('/api/v1/cognitive', require('./modules/cognitive/routes'))
+// app.use('/api/users', require('./modules/users/routes'))
 
 // Location tracking (GPS)
 app.use('/api/location', require('./modules/location/routes'))

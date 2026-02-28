@@ -7,7 +7,7 @@ import RecentConversations from '@/components/dashboard/RecentConversations';
 import MBCard from '@/components/common/Card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Video, Activity } from 'lucide-react';
+import { Video, Activity, ClipboardList } from 'lucide-react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import OnlineUsersCard from '@/components/video/OnlineUsersCard';
 import { motion } from 'framer-motion';
@@ -30,10 +30,10 @@ const CaregiverDashboard = () => (
                 <span>View Alerts</span>
               </Button>
             </Link>
-            <Link to="/caregiver/alerts">
+            <Link to="/caregiver/tasks">
               <Button variant="outline" className="w-full flex flex-col h-auto py-6 gap-2 border-primary/20 hover:bg-primary/5">
-                <Activity size={24} className="text-primary" />
-                <span>View System Alerts</span>
+                <ClipboardList size={24} className="text-primary" />
+                <span>Manage Tasks</span>
               </Button>
             </Link>
           </div>

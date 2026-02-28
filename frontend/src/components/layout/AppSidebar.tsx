@@ -1,4 +1,4 @@
-import { Brain, LayoutDashboard, MessageCircle, Gamepad2, Activity, Heart, MessageSquare, AlertTriangle, UserCog, MapPin, LogOut } from 'lucide-react';
+import { Brain, LayoutDashboard, MessageCircle, Gamepad2, Activity, Heart, MessageSquare, AlertTriangle, UserCog, MapPin, LogOut, ClipboardList, BarChart3 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,7 +21,6 @@ const elderlyLinks = [
   { to: '/elderly/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/elderly/chat', icon: MessageCircle, label: 'Chat' },
   { to: '/elderly/games', icon: Gamepad2, label: 'Games' },
-  { to: '/elderly/activity', icon: Activity, label: 'Activity' },
   { to: '/elderly/health-passport', icon: Heart, label: 'Health' },
 ];
 
@@ -30,6 +29,8 @@ const caregiverLinks = [
   { to: '/caregiver/conversations', icon: MessageSquare, label: 'Conversations' },
   { to: '/caregiver/alerts', icon: AlertTriangle, label: 'Alerts' },
   { to: '/caregiver/location', icon: MapPin, label: 'Location Monitor' },
+  { to: '/caregiver/tasks', icon: ClipboardList, label: 'Tasks' },
+  { to: '/caregiver/cognitive', icon: BarChart3, label: 'Cognitive' },
   { to: '/caregiver/manage-profile', icon: UserCog, label: 'Profile' },
 ];
 
