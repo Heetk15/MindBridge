@@ -8,10 +8,12 @@ import ElderlyChat from './pages/elderly/Chat';
 import ElderlyGames from './pages/elderly/Games';
 import ElderlyActivity from './pages/elderly/Activity';
 import ElderlyHealthPassport from './pages/elderly/HealthPassport';
+import ElderlyVideoCall from './pages/elderly/VideoCall';
 import CaregiverDashboard from './pages/caregiver/Dashboard';
 import CaregiverConversations from './pages/caregiver/Conversations';
 import CaregiverAlerts from './pages/caregiver/Alerts';
 import CaregiverManageProfile from './pages/caregiver/ManageProfile';
+import CaregiverVideoCall from './pages/caregiver/VideoCall';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import NotFound from './pages/NotFound';
 
@@ -30,12 +32,14 @@ const App = () => (
       <Route path="/elderly/games" element={<ProtectedRoute role="elderly"><ElderlyGames /></ProtectedRoute>} />
       <Route path="/elderly/activity" element={<ProtectedRoute role="elderly"><ElderlyActivity /></ProtectedRoute>} />
       <Route path="/elderly/health-passport" element={<ProtectedRoute role="elderly"><ElderlyHealthPassport /></ProtectedRoute>} />
+      <Route path="/elderly/video-call/:id" element={<ProtectedRoute role="elderly"><ElderlyVideoCall /></ProtectedRoute>} />
 
       {/* Caregiver */}
       <Route path="/caregiver/dashboard" element={<ProtectedRoute role="caregiver"><CaregiverDashboard /></ProtectedRoute>} />
       <Route path="/caregiver/conversations" element={<ProtectedRoute role="caregiver"><CaregiverConversations /></ProtectedRoute>} />
       <Route path="/caregiver/alerts" element={<ProtectedRoute role="caregiver"><CaregiverAlerts /></ProtectedRoute>} />
       <Route path="/caregiver/manage-profile" element={<ProtectedRoute role="caregiver"><CaregiverManageProfile /></ProtectedRoute>} />
+      <Route path="/caregiver/video-call/:id" element={<ProtectedRoute role="caregiver"><CaregiverVideoCall /></ProtectedRoute>} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

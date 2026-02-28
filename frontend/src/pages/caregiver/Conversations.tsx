@@ -1,7 +1,9 @@
 import MBCard from '@/components/common/Card';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import { motion } from 'framer-motion';
-import { MessageSquare, TrendingUp } from 'lucide-react';
+import { MessageSquare, TrendingUp, Video } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import type { Conversation } from '@/types/chat.types';
 
 const mockConversations: Conversation[] = [
@@ -37,7 +39,15 @@ const Conversations = () => (
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-display font-semibold text-foreground">{c.userName}</h3>
-                  <span className="text-sm text-muted-foreground">{c.date}</span>
+                  <div className="flex items-center gap-3">
+                    <Link to={`/caregiver/video-call/${c.userId}`}>
+                      <Button size="sm" variant="ghost" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+                        <Video size={16} className="mr-2" />
+                        Call
+                      </Button>
+                    </Link>
+                    <span className="text-sm text-muted-foreground">{c.date}</span>
+                  </div>
                 </div>
                 <p className="text-muted-foreground mb-3">{c.summary}</p>
                 <div className="flex items-center gap-2 text-sm">

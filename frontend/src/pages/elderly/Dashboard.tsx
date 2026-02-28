@@ -7,14 +7,15 @@ import PanicButton from '@/components/emergency/PanicButton';
 import MBCard from '@/components/common/Card';
 import { useCognitiveStore } from '@/store/cognitiveStore';
 import { Link } from 'react-router-dom';
-import { Gamepad2, MessageCircle, Activity, Heart } from 'lucide-react';
+import { Gamepad2, MessageCircle, Activity, Heart, Video } from 'lucide-react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 
 const quickLinks = [
   { to: '/elderly/chat', icon: MessageCircle, label: 'Chat', color: 'bg-primary/10 text-primary' },
+  { to: '/elderly/video-call/current', icon: Video, label: 'Video Call', color: 'bg-indigo-500/10 text-indigo-500' },
   { to: '/elderly/games', icon: Gamepad2, label: 'Games', color: 'bg-success/10 text-success' },
   { to: '/elderly/activity', icon: Activity, label: 'Activity', color: 'bg-accent/10 text-accent' },
-  { to: '/elderly/health-passport', icon: Heart, label: 'Health', color: 'bg-warning/10 text-warning' },
+  // { to: '/elderly/health-passport', icon: Heart, label: 'Health', color: 'bg-warning/10 text-warning' },
 ];
 
 const ElderlyDashboard = () => {
