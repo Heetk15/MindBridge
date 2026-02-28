@@ -2,7 +2,7 @@ const path = require('path')
 const RAGService = require('../services/RAGService')
 const DocumentIngestionService = require('../services/DocumentIngestionService')
 const chromaDB = require('../services/ChromaDBService')
-const { PDFParse } = require('pdf-parse')
+const pdfParse = require('pdf-parse')
 
 /**
  * RAG Controller
@@ -213,23 +213,16 @@ class RAGController {
 
       // Handle PDF upload
       if (req.file) {
-        const parser = new PDFParse({ data: req.file.buffer })
         let content = ''
         let numPages = 1
         try {
-          const textResult = await parser.getText()
-          content = textResult.text || ''
-        } catch (e) {
-          // fallback: try getInfo with text
-          const infoResult = await parser.getInfo()
-          content = infoResult.text || ''
-          numPages = infoResult.total || 1
+          const parsed = await pdfParse(req.file.buffer)
+          content  = parsed.text || ''
+          numPages = parsed.numpages || 1
+        } catch (parseErr) {
+          console.error('PDF parse error:', parseErr.message)
+          return res.status(422).json({ error: 'Could not extract text from PDF' })
         }
-        try {
-          const infoResult = await parser.getInfo()
-          numPages = infoResult.total || 1
-        } catch (e) { /* ignore - page count is optional */ }
-        await parser.destroy().catch(() => {})
 
         if (!content || content.trim().length < 10) {
           return res.status(400).json({ error: 'PDF has no readable text' })

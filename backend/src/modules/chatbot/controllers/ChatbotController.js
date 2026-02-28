@@ -39,6 +39,58 @@ function resolveUserId(rawId) {
   }
 }
 
+/**
+ * Derive a mood label and short topic summary from an array of messages.
+ * Runs entirely in-process — no LLM call needed.
+ */
+function deriveInsight(messages = []) {
+  const userMsgs = messages.filter((m) => m.sender === 'user').map((m) => m.text.toLowerCase())
+  if (!userMsgs.length) return { mood: 'No data', moodColor: 'gray', summary: 'No messages recorded yet.' }
+
+  const positiveWords = ['good', 'great', 'happy', 'wonderful', 'fine', 'better', 'love', 'nice', 'thank', 'glad', 'lovely', 'well', 'excited', 'cheerful']
+  const negativeWords = ['pain', 'hurt', 'sad', 'worried', 'scared', 'lonely', 'confused', 'lost', 'bad', 'terrible', 'sick', 'unwell', 'ache', 'dizzy', 'tired', 'anxious', 'upset', 'cry', 'afraid', 'help me']
+
+  let posScore = 0, negScore = 0
+  userMsgs.forEach((t) => {
+    positiveWords.forEach((w) => { if (t.includes(w)) posScore++ })
+    negativeWords.forEach((w) => { if (t.includes(w)) negScore++ })
+  })
+
+  let mood, moodColor
+  if      (negScore >= posScore + 2) { mood = 'Distressed'; moodColor = 'red'    }
+  else if (negScore > posScore)      { mood = 'Concerned';  moodColor = 'orange' }
+  else if (posScore >= negScore + 2) { mood = 'Positive';   moodColor = 'green'  }
+  else if (posScore > negScore)      { mood = 'Content';    moodColor = 'blue'   }
+  else                               { mood = 'Neutral';    moodColor = 'gray'   }
+
+  // Topic detection
+  const topicMap = [
+    { label: 'family',       words: ['family', 'son', 'daughter', 'wife', 'husband', 'grandchild', 'child', 'brother', 'sister', 'mother', 'father'] },
+    { label: 'health',       words: ['pain', 'medication', 'medicine', 'doctor', 'sick', 'hurt', 'ache', 'dizzy', 'symptom', 'hospital'] },
+    { label: 'memory',       words: ['remember', 'forget', 'memory', 'forgot', 'recall'] },
+    { label: 'wellbeing',    words: ['lonely', 'tired', 'worried', 'anxious', 'sad', 'scared'] },
+    { label: 'daily life',   words: ['eat', 'sleep', 'exercise', 'walk', 'morning', 'night', 'food', 'breakfast', 'lunch', 'dinner'] },
+    { label: 'general chat', words: ['how are you', 'your day', 'hello', 'hi', 'weather', 'tell me', 'what do you'] },
+  ]
+
+  const allText = userMsgs.join(' ')
+  const detectedTopics = topicMap
+    .filter(({ words }) => words.some((w) => allText.includes(w)))
+    .map(({ label }) => label)
+
+  let summary
+  if (detectedTopics.length === 0) {
+    summary = `Short conversation with ${userMsgs.length} message${userMsgs.length > 1 ? 's' : ''}.`
+  } else if (detectedTopics.length === 1) {
+    summary = `Conversation centred around ${detectedTopics[0]}.`
+  } else {
+    const last = detectedTopics.pop()
+    summary = `Discussed ${detectedTopics.join(', ')} and ${last}.`
+  }
+
+  return { mood, moodColor, summary }
+}
+
 class ChatbotController {
   // ── POST /api/chatbot/send ──────────────────────────────────────────────────
   static async sendMessage(req, res) {
@@ -289,17 +341,23 @@ class ChatbotController {
       return res.json({
         success: true,
         total:   conversations.length,
-        conversations: conversations.map((c) => ({
-          id:           c._id.toString(),
-          title:        c.title,
-          status:       c.status,
-          messageCount: c.messages?.length || c.messageCount || 0,
-          aiModel:      c.aiModel,
-          startedAt:    c.startedAt,
-          lastMessage:  c.messages?.length
-            ? c.messages[c.messages.length - 1]?.text?.substring(0, 80)
-            : null,
-        })),
+        conversations: conversations.map((c) => {
+          const insight = deriveInsight(c.messages || [])
+          return {
+            id:           c._id.toString(),
+            title:        c.title,
+            status:       c.status,
+            messageCount: c.messages?.length || c.messageCount || 0,
+            aiModel:      c.aiModel,
+            startedAt:    c.startedAt,
+            lastMessage:  c.messages?.length
+              ? c.messages[c.messages.length - 1]?.text?.substring(0, 80)
+              : null,
+            mood:         insight.mood,
+            moodColor:    insight.moodColor,
+            summary:      insight.summary,
+          }
+        }),
       })
     } catch (error) {
       console.error('Get conversations error:', error)

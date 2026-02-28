@@ -4,7 +4,7 @@ import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare, ChevronDown, ChevronRight, User, Bot,
-  Loader2, RefreshCw, Calendar, Hash, AlertCircle,
+  Loader2, RefreshCw, Calendar, Hash, AlertCircle, Smile,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import chatService from '@/services/chatService';
@@ -23,9 +23,20 @@ interface ConvDetail {
   messageCount: number;
   startedAt: string;
   lastMessage: string | null;
+  mood?: string;
+  moodColor?: string;
+  summary?: string;
   messages?: Message[];
   _expanded?: boolean;
   _loading?: boolean;
+}
+
+const moodStyles: Record<string, string> = {
+  green:  'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  blue:   'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  orange: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  red:    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  gray:   'bg-secondary text-muted-foreground',
 }
 
 const MsgBubble = ({ msg }: { msg: Message }) => {
@@ -166,6 +177,14 @@ const Conversations = () => {
                             {c.title}
                           </h3>
                           <div className="flex items-center gap-2 flex-shrink-0">
+                            {c.mood && (
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex items-center gap-1 ${
+                                moodStyles[c.moodColor || 'gray']
+                              }`}>
+                                <Smile size={11} />
+                                {c.mood}
+                              </span>
+                            )}
                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium
                               ${c.status === 'active'
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
@@ -188,7 +207,12 @@ const Conversations = () => {
                             {c.messageCount} messages
                           </span>
                         </div>
-                        {c.lastMessage && !c._expanded && (
+                        {c.summary && (
+                          <p className="text-xs text-muted-foreground mt-1.5 italic">
+                            {c.summary}
+                          </p>
+                        )}
+                        {c.lastMessage && !c._expanded && !c.summary && (
                           <p className="text-sm text-muted-foreground mt-1.5 line-clamp-1">
                             {c.lastMessage}…
                           </p>

@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiX, FiUpload, FiFileText, FiCheckCircle, FiAlertCircle } from 'react-icons/fi'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api'
 
 interface Props {
   isOpen: boolean

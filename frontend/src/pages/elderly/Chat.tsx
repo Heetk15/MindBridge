@@ -4,6 +4,8 @@ import {
   FiSend,
   FiArrowLeft,
   FiDatabase,
+  FiVolume2,
+  FiVolumeX,
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChatStore } from '../../store/chatStore'
@@ -32,6 +34,8 @@ function ChatbotPage() {
   const [inputText, setInputText] = useState('')
   const [useVoice, setUseVoice] = useState(false)
   const [showKBModal, setShowKBModal] = useState(false)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
+  const prevIsTypingRef = useRef(false)
 
   // ── Emergency confirmation handlers ─────────────────────────────────────
   const handleEmergencyConfirm = async () => {
@@ -77,6 +81,20 @@ function ChatbotPage() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Auto-TTS: speak the last assistant message when LLM finishes responding
+  useEffect(() => {
+    if (prevIsTypingRef.current && !isTyping && ttsEnabled && messages.length > 0) {
+      const lastMsg = messages[messages.length - 1]
+      if (lastMsg.sender !== 'user') {
+        window.speechSynthesis.cancel()
+        const utterance = new SpeechSynthesisUtterance(lastMsg.text)
+        utterance.rate = 0.8
+        window.speechSynthesis.speak(utterance)
+      }
+    }
+    prevIsTypingRef.current = isTyping
+  }, [isTyping]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle sending text message
   const handleSendMessage = async (text = inputText) => {
@@ -128,6 +146,22 @@ function ChatbotPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                const next = !ttsEnabled
+                setTtsEnabled(next)
+                if (!next) window.speechSynthesis.cancel()
+              }}
+              className={`p-3 rounded-xl transition-all font-medium flex items-center gap-2 ${
+                ttsEnabled
+                  ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                  : 'hover:bg-secondary text-muted-foreground'
+              }`}
+              title={ttsEnabled ? 'Disable speech' : 'Enable speech'}
+            >
+              {ttsEnabled ? <FiVolume2 size={18} /> : <FiVolumeX size={18} />}
+              <span className="hidden sm:inline text-sm">{ttsEnabled ? 'Speech On' : 'Speech Off'}</span>
+            </button>
             <button
               onClick={() => setShowKBModal(true)}
               className="p-3 hover:bg-secondary rounded-xl transition-all font-medium text-primary flex items-center gap-2"
@@ -206,6 +240,7 @@ function ChatbotPage() {
                 <motion.div key={msg.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                   <ChatMessage
                     message={msg}
+                    ttsEnabled={ttsEnabled}
                     onReaction={(id: string, reaction: string | null) => {
                       console.log('Reaction:', id, reaction)
                     }}

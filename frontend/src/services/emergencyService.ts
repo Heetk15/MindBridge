@@ -1,4 +1,7 @@
+import axios from 'axios';
 import type { EmergencyAlert, DBAlert } from '@/types/emergency.types';
+
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5004/api`;
 
 export const mockAlerts: EmergencyAlert[] = [
   { id: '1', type: 'panic', message: 'Panic button pressed', timestamp: '2026-02-28 09:15', resolved: false, severity: 'critical' },
@@ -6,10 +9,6 @@ export const mockAlerts: EmergencyAlert[] = [
   { id: '3', type: 'phrase', message: 'Distress phrase detected: "I don\'t know where I am"', timestamp: '2026-02-26 11:00', resolved: true, severity: 'high' },
   { id: '4', type: 'inactivity', message: 'No activity for 4 hours', timestamp: '2026-02-25 16:45', resolved: true, severity: 'medium' },
 ];
-
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5004/api`;
 
 /** Trigger Twilio SOS phone call */
 export const triggerEmergency = async (elderlyName: string): Promise<any> => {

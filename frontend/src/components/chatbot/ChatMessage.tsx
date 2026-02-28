@@ -2,7 +2,11 @@ import { FiCheckCircle, FiCopy, FiThumbsUp, FiThumbsDown, FiVolume2, FiVolumeX }
 import { useState } from 'react'
 import { ChatMessage as ChatMessageType } from '../../types/chat.types'
 
-function ChatMessage({ message, onReaction }: { message: ChatMessageType; onReaction?: (id: string, reaction: string | null) => void }) {
+function ChatMessage({ message, ttsEnabled = true, onReaction }: {
+  message: ChatMessageType
+  ttsEnabled?: boolean
+  onReaction?: (id: string, reaction: string | null) => void
+}) {
   const [copied, setCopied] = useState(false)
   const [reaction, setReaction] = useState<string | null>(null)
   const [isSpeaking, setIsSpeaking] = useState(false)
@@ -66,9 +70,13 @@ function ChatMessage({ message, onReaction }: { message: ChatMessageType; onReac
           <button
             onClick={speak}
             className="p-2.5 bg-card/80 backdrop-blur-md border border-border/50 rounded-xl hover:bg-secondary transition-colors text-muted-foreground shadow-sm"
-            title="Listen to message"
+            title={ttsEnabled ? (isSpeaking ? 'Stop speaking' : 'Listen to message') : 'Speech is disabled'}
           >
-            {isSpeaking ? <FiVolumeX size={14} className="text-primary animate-pulse" /> : <FiVolume2 size={14} />}
+            {isSpeaking
+              ? <FiVolumeX size={14} className="text-primary animate-pulse" />
+              : ttsEnabled
+                ? <FiVolume2 size={14} />
+                : <FiVolumeX size={14} className="opacity-40" />}
           </button>
           <div className="h-px bg-border/30 mx-1" />
           <button
