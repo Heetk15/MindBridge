@@ -5,7 +5,7 @@ class ChatbotService {
   /**
    * Send message to Gemini API
    */
-  static async sendToGemini(message) {
+  static async sendToGemini(message, language = 'auto') {
     const apiKey = process.env.GEMINI_API_KEY
 
     if (!apiKey) {
@@ -68,7 +68,10 @@ You must decide what kind of message this is and respond accordingly:
 
 Never force knowledge base content into casual conversation. Read the room and respond like a real person would.
 
-KNOWLEDGE BASE COVERS: Family information, medical health conditions, nutrition, daily exercise routines, wellness tips, hobbies, and lifestyle guidance.`
+KNOWLEDGE BASE COVERS: Family information, medical health conditions, nutrition, daily exercise routines, wellness tips, hobbies, and lifestyle guidance.
+
+MULTILINGUAL SUPPORT:
+${language && language !== 'auto' ? `IMPORTANT: The user has selected "${language}" as their preferred language. You MUST respond ENTIRELY in ${language}. Do not mix languages — every word of your reply should be in ${language}. Translate any knowledge base content you reference into ${language} as well.` : 'If the user writes in a non-English language, automatically detect it and reply ENTIRELY in that same language. Match their language naturally. If they write in English, reply in English.'}`
 
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
@@ -117,7 +120,7 @@ KNOWLEDGE BASE COVERS: Family information, medical health conditions, nutrition,
   /**
    * Send message to Groq API
    */
-  static async sendToGroq(message) {
+  static async sendToGroq(message, language = 'auto') {
     const apiKey = process.env.GROQ_API_KEY
 
     if (!apiKey) {
@@ -180,7 +183,10 @@ You must decide what kind of message this is and respond accordingly:
 
 Never force knowledge base content into casual conversation. Read the room and respond like a real person would.
 
-KNOWLEDGE BASE COVERS: Family information, medical health conditions, nutrition, daily exercise routines, wellness tips, hobbies, and lifestyle guidance.`
+KNOWLEDGE BASE COVERS: Family information, medical health conditions, nutrition, daily exercise routines, wellness tips, hobbies, and lifestyle guidance.
+
+MULTILINGUAL SUPPORT:
+${language && language !== 'auto' ? `IMPORTANT: The user has selected "${language}" as their preferred language. You MUST respond ENTIRELY in ${language}. Do not mix languages — every word of your reply should be in ${language}. Translate any knowledge base content you reference into ${language} as well.` : 'If the user writes in a non-English language, automatically detect it and reply ENTIRELY in that same language. Match their language naturally. If they write in English, reply in English.'}`
 
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',

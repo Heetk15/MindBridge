@@ -6,6 +6,7 @@ import {
   FiDatabase,
   FiVolume2,
   FiVolumeX,
+  FiGlobe,
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChatStore } from '../../store/chatStore'
@@ -16,6 +17,27 @@ import EmergencyBanner from '../../components/emergency/EmergencyBanner'
 import { triggerEmergency } from '../../services/emergencyService'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api'
+
+const LANGUAGES = [
+  { code: 'auto',       label: 'Auto-detect',  flag: '🌐', ttsLang: '' },
+  { code: 'English',    label: 'English',       flag: '🇬🇧', ttsLang: 'en-US' },
+  { code: 'Hindi',      label: 'हिंदी',          flag: '🇮🇳', ttsLang: 'hi-IN' },
+  { code: 'Tamil',      label: 'தமிழ்',          flag: '🇮🇳', ttsLang: 'ta-IN' },
+  { code: 'Telugu',     label: 'తెలుగు',         flag: '🇮🇳', ttsLang: 'te-IN' },
+  { code: 'Bengali',    label: 'বাংলা',         flag: '🇮🇳', ttsLang: 'bn-IN' },
+  { code: 'Kannada',    label: 'ಕನ್ನಡ',         flag: '🇮🇳', ttsLang: 'kn-IN' },
+  { code: 'Malayalam',  label: 'മലയാളം',       flag: '🇮🇳', ttsLang: 'ml-IN' },
+  { code: 'Marathi',    label: 'मराठी',         flag: '🇮🇳', ttsLang: 'mr-IN' },
+  { code: 'Gujarati',   label: 'ગુજરાતી',       flag: '🇮🇳', ttsLang: 'gu-IN' },
+  { code: 'Spanish',    label: 'Español',       flag: '🇪🇸', ttsLang: 'es-ES' },
+  { code: 'French',     label: 'Français',      flag: '🇫🇷', ttsLang: 'fr-FR' },
+  { code: 'German',     label: 'Deutsch',       flag: '🇩🇪', ttsLang: 'de-DE' },
+  { code: 'Portuguese', label: 'Português',     flag: '🇧🇷', ttsLang: 'pt-BR' },
+  { code: 'Arabic',     label: 'العربية',        flag: '🇸🇦', ttsLang: 'ar-SA' },
+  { code: 'Japanese',   label: '日本語',          flag: '🇯🇵', ttsLang: 'ja-JP' },
+  { code: 'Chinese',    label: '中文',           flag: '🇨🇳', ttsLang: 'zh-CN' },
+  { code: 'Korean',     label: '한국어',          flag: '🇰🇷', ttsLang: 'ko-KR' },
+]
 
 function ChatbotPage() {
   const navigate = useNavigate()
@@ -29,13 +51,17 @@ function ChatbotPage() {
     sendVoiceMessage,
     clearMessages,
     clearEmergency,
+    language,
+    setLanguage,
   } = useChatStore()
 
   const [inputText, setInputText] = useState('')
   const [useVoice, setUseVoice] = useState(false)
   const [showKBModal, setShowKBModal] = useState(false)
   const [ttsEnabled, setTtsEnabled] = useState(true)
+  const [showLangMenu, setShowLangMenu] = useState(false)
   const prevIsTypingRef = useRef(false)
+  const langMenuRef = useRef<HTMLDivElement>(null)
 
   // ── Emergency confirmation handlers ─────────────────────────────────────
   const handleEmergencyConfirm = async () => {
@@ -90,11 +116,28 @@ function ChatbotPage() {
         window.speechSynthesis.cancel()
         const utterance = new SpeechSynthesisUtterance(lastMsg.text)
         utterance.rate = 0.8
+        // Match TTS voice to selected language
+        const langEntry = LANGUAGES.find((l) => l.code === language)
+        if (langEntry?.ttsLang) {
+          utterance.lang = langEntry.ttsLang
+          const voices = window.speechSynthesis.getVoices()
+          const match = voices.find((v) => v.lang.startsWith(langEntry.ttsLang.split('-')[0]))
+          if (match) utterance.voice = match
+        }
         window.speechSynthesis.speak(utterance)
       }
     }
     prevIsTypingRef.current = isTyping
   }, [isTyping]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close language menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) setShowLangMenu(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   // Handle sending text message
   const handleSendMessage = async (text = inputText) => {
@@ -146,6 +189,39 @@ function ChatbotPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Language selector */}
+            <div className="relative" ref={langMenuRef}>
+              <button
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="p-3 hover:bg-secondary rounded-xl transition-all font-medium text-primary flex items-center gap-2"
+                title="Change language"
+              >
+                <FiGlobe size={18} />
+                <span className="hidden sm:inline text-sm">
+                  {LANGUAGES.find((l) => l.code === language)?.flag || '🌐'}{' '}
+                  {language === 'auto' ? 'Auto' : language}
+                </span>
+              </button>
+              {showLangMenu && (
+                <div className="absolute right-0 top-full mt-1 w-56 max-h-72 overflow-y-auto bg-card border border-border rounded-xl shadow-xl z-50 scrollbar-thin">
+                  {LANGUAGES.map((l) => (
+                    <button
+                      key={l.code}
+                      onClick={() => { setLanguage(l.code); setShowLangMenu(false) }}
+                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-secondary transition-colors ${
+                        language === l.code ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground'
+                      }`}
+                    >
+                      <span>{l.flag}</span>
+                      <span>{l.label}</span>
+                      {l.code !== 'auto' && l.label !== l.code && (
+                        <span className="text-xs text-muted-foreground ml-auto">{l.code}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button
               onClick={() => {
                 const next = !ttsEnabled

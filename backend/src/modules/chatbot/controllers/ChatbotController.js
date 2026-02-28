@@ -95,7 +95,7 @@ class ChatbotController {
   // ── POST /api/chatbot/send ──────────────────────────────────────────────────
   static async sendMessage(req, res) {
     try {
-      const { message, conversationId, userId, location, userMeta } = req.body
+      const { message, conversationId, userId, location, userMeta, language } = req.body
 
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ error: 'Message is required' })
@@ -124,8 +124,8 @@ class ChatbotController {
       const model = ChatbotService.getConfiguredModel()
       const [aiResult, emergencyResult] = await Promise.all([
         model === 'gemini'
-          ? ChatbotService.sendToGemini(message)
-          : ChatbotService.sendToGroq(message),
+          ? ChatbotService.sendToGemini(message, language)
+          : ChatbotService.sendToGroq(message, language),
         pendingState !== 'awaiting_confirm'
           ? EmergencyDetectionService.detectAndProcess(
               sessionUserId, message, context, location || null, userMeta || {}

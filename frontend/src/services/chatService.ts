@@ -10,12 +10,13 @@ const chatService = {
    * @param {string | null} conversationId - Conversation ID
    * @returns {Promise<any>} - Response from AI
    */
-  sendMessage: async (message: string, conversationId?: string | null): Promise<any> => {
+  sendMessage: async (message: string, conversationId?: string | null, language?: string): Promise<any> => {
     try {
-      const payload = {
+      const payload: any = {
         message,
         conversationId,
       }
+      if (language && language !== 'auto') payload.language = language
 
       const response = await axios.post(`${API_URL}/chatbot/send`, payload, {
         timeout: 30000,

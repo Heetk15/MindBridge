@@ -20,7 +20,9 @@ interface ChatState {
   conversationId: string | null;
   error: string | null;
   emergency: EmergencyData | null;
+  language: string;
   setConversationId: (id: string) => void;
+  setLanguage: (lang: string) => void;
   sendMessage: (text: string) => Promise<void>;
   sendVoiceMessage: (audioBase64: string) => Promise<void>;
   clearMessages: () => void;
@@ -35,13 +37,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
   conversationId: null,
   error: null,
   emergency: null,
+  language: 'auto',
 
   setConversationId: (id) => set({ conversationId: id }),
+
+  setLanguage: (lang) => set({ language: lang }),
 
   clearEmergency: () => set({ emergency: null }),
 
   sendMessage: async (text) => {
-    let { conversationId } = get();
+    let { conversationId, language } = get();
 
     // Auto-create a conversation in MongoDB on the first message
     if (!conversationId) {
@@ -57,7 +62,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set((s) => ({ messages: [...s.messages, userMsg], isTyping: true, error: null }));
 
     try {
-      const response = await chatService.sendMessage(text, conversationId);
+      const response = await chatService.sendMessage(text, conversationId, language);
       const aiText = response.reply || response.text || response.message || 'Received response';
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
