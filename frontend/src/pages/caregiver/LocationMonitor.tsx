@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import iconUrl from 'leaflet/dist/images/marker-icon.png';
@@ -10,7 +10,7 @@ import MBCard from '@/components/common/Card';
 import { motion } from 'framer-motion';
 import {
   MapPin, Navigation, Shield, AlertTriangle, Clock, RotateCw,
-  CheckCircle, Lock, Unlock,
+  CheckCircle, Lock, Unlock, Play, Square, MousePointerClick,
 } from 'lucide-react';
 
 // ── Fix Leaflet default marker icon for Vite (prevents 404 / broken icon) ──
@@ -48,6 +48,8 @@ const SAFE_RADIUS = 5; // metres – matches backend FALLBACK_RADIUS
 const POLLING_INTERVAL = 3000; // 3 s
 const DEFAULT_ELDERLY_USER_ID = '1';
 const DEFAULT_MAP_ZOOM = 19;
+const SIM_STEP_INTERVAL = 2000; // simulation sends a new point every 2s
+const SIM_STEP_METERS = 2; // each simulation step moves ~2 m
 
 const API_URL =
   import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5004/api`;
@@ -69,6 +71,21 @@ const calculateDistance = (
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
+// ── Offset a lat/lng by a distance (metres) in a given bearing (degrees) ────
+
+const offsetLatLng = (
+  lat: number, lng: number, distMeters: number, bearingDeg: number,
+): { lat: number; lng: number } => {
+  const R = 6371e3;
+  const δ = distMeters / R;
+  const θ = (bearingDeg * Math.PI) / 180;
+  const φ1 = (lat * Math.PI) / 180;
+  const λ1 = (lng * Math.PI) / 180;
+  const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
+  const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
+  return { lat: (φ2 * 180) / Math.PI, lng: (λ2 * 180) / Math.PI };
+};
+
 // ── Map auto-recenter helper ─────────────────────────────────────────────────
 
 const MapUpdater = ({ center }: { center: [number, number] }) => {
@@ -76,6 +93,25 @@ const MapUpdater = ({ center }: { center: [number, number] }) => {
   useEffect(() => {
     map.setView(center, map.getZoom());
   }, [center, map]);
+  return null;
+};
+
+// ── Map click handler (for setting safe zone by clicking) ────────────────────
+
+const MapClickHandler = ({
+  enabled,
+  onMapClick,
+}: {
+  enabled: boolean;
+  onMapClick: (lat: number, lng: number) => void;
+}) => {
+  useMapEvents({
+    click(e) {
+      if (enabled) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      }
+    },
+  });
   return null;
 };
 
@@ -98,6 +134,15 @@ const LocationMonitorPage = () => {
   });
   const [safeCenterLocked, setSafeCenterLocked] = useState(false);
 
+  // Simulation mode state
+  const [simRunning, setSimRunning] = useState(false);
+  const [simStep, setSimStep] = useState(0);
+  const simIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const simBearingRef = useRef(45); // walk direction in degrees (NE)
+
+  // Map-click safe zone state
+  const [mapClickMode, setMapClickMode] = useState(false);
+
   // Refs
   const safeCenterRef = useRef<{ lat: number; lng: number } | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -112,6 +157,22 @@ const LocationMonitorPage = () => {
       radius,
     };
   };
+
+  // ── Reset the backend's "home" reference for the dev store ────────────────
+  // The backend stores _homeLat/_homeLng from the first ever update. When the
+  // caregiver changes the safe zone center we must tell the backend to treat
+  // the new center as "home" so distance is computed from there.
+  const resetBackendHome = useCallback(async (lat: number, lng: number) => {
+    try {
+      await fetch(`${API_URL}/location/reset-home/${elderlyUserId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ latitude: lat, longitude: lng }),
+      });
+    } catch {
+      // Non-critical – fallback to client-side distance calc
+    }
+  }, [elderlyUserId]);
 
   // Fetch latest location from backend
   const fetchLocation = useCallback(async () => {
@@ -143,7 +204,7 @@ const LocationMonitorPage = () => {
 
       const { latitude, longitude } = data as LocationData;
 
-      // Auto-lock safe center on first successful fetch
+      // Auto-lock safe center on first successful fetch (if not already set)
       if (!safeCenterRef.current && !safeCenterLocked) {
         safeCenterRef.current = { lat: latitude, lng: longitude };
         setSafeCenterLocked(true);
@@ -181,7 +242,9 @@ const LocationMonitorPage = () => {
     }
   }, [elderlyUserId, radius, safeCenterLocked]);
 
-  // Set safe center manually
+  // ── Safe zone controls ─────────────────────────────────────────────────────
+
+  // Set safe center from current patient position
   const handleSetSafeCenter = () => {
     if (locationState.latitude != null && locationState.longitude != null) {
       safeCenterRef.current = {
@@ -189,7 +252,16 @@ const LocationMonitorPage = () => {
         lng: locationState.longitude,
       };
       setSafeCenterLocked(true);
+      resetBackendHome(locationState.latitude, locationState.longitude);
     }
+  };
+
+  // Set safe center by clicking on the map
+  const handleMapClick = (lat: number, lng: number) => {
+    safeCenterRef.current = { lat, lng };
+    setSafeCenterLocked(true);
+    setMapClickMode(false);
+    resetBackendHome(lat, lng);
   };
 
   // Reset safe zone
@@ -197,6 +269,90 @@ const LocationMonitorPage = () => {
     safeCenterRef.current = null;
     setSafeCenterLocked(false);
   };
+
+  // ── Simulation mode ────────────────────────────────────────────────────────
+
+  const startSimulation = useCallback(async () => {
+    // Need a safe zone center to simulate from
+    let startLat: number;
+    let startLng: number;
+
+    if (safeCenterRef.current) {
+      startLat = safeCenterRef.current.lat;
+      startLng = safeCenterRef.current.lng;
+    } else {
+      // Use a default location (Mumbai) if nothing is set yet
+      startLat = 19.076;
+      startLng = 72.8777;
+      safeCenterRef.current = { lat: startLat, lng: startLng };
+      setSafeCenterLocked(true);
+    }
+
+    // Seed the backend with the safe zone center as starting position
+    try {
+      await fetch(`${API_URL}/location/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: startLat,
+          longitude: startLng,
+          userId: elderlyUserId,
+          accuracy: 5,
+        }),
+      });
+    } catch { /* ignore */ }
+
+    // Reset the backend home to match the safe zone center
+    await resetBackendHome(startLat, startLng);
+
+    // Start walking simulation
+    let step = 0;
+    const bearing = simBearingRef.current;
+    setSimRunning(true);
+    setSimStep(0);
+
+    // Clear any previous interval
+    if (simIntervalRef.current) clearInterval(simIntervalRef.current);
+
+    simIntervalRef.current = setInterval(async () => {
+      step += 1;
+      setSimStep(step);
+
+      // Calculate new position: move `step * SIM_STEP_METERS` from center
+      const totalDist = step * SIM_STEP_METERS;
+      const newPos = offsetLatLng(startLat, startLng, totalDist, bearing);
+
+      try {
+        await fetch(`${API_URL}/location/update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            latitude: newPos.lat,
+            longitude: newPos.lng,
+            userId: elderlyUserId,
+            accuracy: 5,
+          }),
+        });
+      } catch {
+        // ignore network errors in sim
+      }
+    }, SIM_STEP_INTERVAL);
+  }, [elderlyUserId, resetBackendHome]);
+
+  const stopSimulation = useCallback(() => {
+    if (simIntervalRef.current) {
+      clearInterval(simIntervalRef.current);
+      simIntervalRef.current = null;
+    }
+    setSimRunning(false);
+  }, []);
+
+  // Cleanup sim on unmount
+  useEffect(() => {
+    return () => {
+      if (simIntervalRef.current) clearInterval(simIntervalRef.current);
+    };
+  }, []);
 
   // Client-side mount guard (Leaflet is browser-only)
   useEffect(() => { setMounted(true); }, []);
@@ -236,6 +392,25 @@ const LocationMonitorPage = () => {
           </div>
 
           <div className="flex gap-2">
+            {/* Simulation toggle */}
+            {!simRunning ? (
+              <button
+                onClick={startSimulation}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 text-sm font-medium transition-colors"
+              >
+                <Play size={15} />
+                Simulate Walk
+              </button>
+            ) : (
+              <button
+                onClick={stopSimulation}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-destructive/15 text-destructive hover:bg-destructive/25 text-sm font-medium transition-colors"
+              >
+                <Square size={15} />
+                Stop Sim (step {simStep})
+              </button>
+            )}
+
             <button
               onClick={fetchLocation}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary hover:bg-secondary/80 text-sm font-medium transition-colors"
@@ -245,6 +420,41 @@ const LocationMonitorPage = () => {
             </button>
           </div>
         </motion.div>
+
+        {/* Simulation info banner */}
+        {simRunning && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3 mb-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30"
+          >
+            <Play className="text-emerald-600 flex-shrink-0 animate-pulse" size={18} />
+            <p className="text-sm text-emerald-700 dark:text-emerald-400">
+              <strong>Simulation active</strong> — virtual patient is walking away from safe zone ({simStep * SIM_STEP_METERS} m so far).
+              Alert will trigger when distance exceeds {radius} m.
+            </p>
+          </motion.div>
+        )}
+
+        {/* Map-click mode banner */}
+        {mapClickMode && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3 mb-4 rounded-xl bg-blue-500/10 border border-blue-500/30"
+          >
+            <MousePointerClick className="text-blue-600 flex-shrink-0 animate-bounce" size={18} />
+            <p className="text-sm text-blue-700 dark:text-blue-400">
+              <strong>Click anywhere on the map</strong> to set the safe zone center.
+            </p>
+            <button
+              onClick={() => setMapClickMode(false)}
+              className="ml-auto text-xs px-2 py-1 rounded bg-blue-500/20 hover:bg-blue-500/30"
+            >
+              Cancel
+            </button>
+          </motion.div>
+        )}
 
         {/* Status cards */}
         <div className="grid sm:grid-cols-3 gap-4 mb-6">
@@ -316,14 +526,27 @@ const LocationMonitorPage = () => {
               Reset Safe Zone
             </button>
           ) : (
-            <button
-              onClick={handleSetSafeCenter}
-              disabled={!isLocationReady}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-sm font-medium transition-colors disabled:opacity-50"
-            >
-              <Lock size={15} />
-              Set Current as Safe Zone
-            </button>
+            <>
+              <button
+                onClick={handleSetSafeCenter}
+                disabled={!isLocationReady}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <Lock size={15} />
+                Set Current as Safe Zone
+              </button>
+              <button
+                onClick={() => setMapClickMode(!mapClickMode)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  mapClickMode
+                    ? 'bg-blue-500/25 text-blue-600 ring-2 ring-blue-500/40'
+                    : 'bg-blue-500/15 text-blue-600 hover:bg-blue-500/25'
+                }`}
+              >
+                <MousePointerClick size={15} />
+                {mapClickMode ? 'Click Map Now…' : 'Place on Map'}
+              </button>
+            </>
           )}
           <span className="text-xs text-muted-foreground">
             Radius: <strong>{radius} m</strong>
@@ -376,12 +599,14 @@ const LocationMonitorPage = () => {
               zoom={DEFAULT_MAP_ZOOM}
               style={{ height: '500px', width: '100%' }}
               scrollWheelZoom
+              className={mapClickMode ? 'cursor-crosshair' : ''}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
               <MapUpdater center={[locationState.latitude!, locationState.longitude!]} />
+              <MapClickHandler enabled={mapClickMode} onMapClick={handleMapClick} />
 
               {/* Patient marker */}
               <Marker position={[locationState.latitude!, locationState.longitude!]}>

@@ -95,7 +95,8 @@ router.post('/update', updateLimiter, optionalAuth, async (req, res) => {
       const accuracy = Number(req.body.accuracy) || 100;
       const JITTER_FACTOR = 0.3;          // 30 % of reported accuracy
       const MIN_JITTER_THRESHOLD = 3;     // never less than 3 m
-      const noiseThreshold = Math.max(accuracy * JITTER_FACTOR, MIN_JITTER_THRESHOLD);
+      // Skip jitter filter when accuracy is excellent (≤ 5 m) – e.g. simulation mode or real GPS
+      const noiseThreshold = accuracy <= 5 ? 0 : Math.max(accuracy * JITTER_FACTOR, MIN_JITTER_THRESHOLD);
 
       // If we already have a position, check if the new reading is real
       // movement or just GPS noise.
@@ -338,6 +339,66 @@ router.get('/latest/:userId', optionalAuth, async (req, res) => {
   } catch (err) {
     console.error('[Location] Fetch error:', err.message);
     return res.status(500).json({ success: false, message: 'Internal server error fetching location' });
+  }
+});
+
+// POST /api/location/reset-home/:userId
+// Allows the caregiver to reset the "home" reference point for geofencing.
+// Used when setting safe zone from the map or before running a simulation.
+router.post('/reset-home/:userId', optionalAuth, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { latitude, longitude } = req.body || {};
+    const parsed = validateLatLng(latitude, longitude);
+    if (!parsed.ok) {
+      return res.status(400).json({ success: false, message: parsed.message });
+    }
+
+    // Dev mode / no-auth: reset the in-memory store home
+    if (isDevMode() || !req.user) {
+      const existing = devLocationStore.get(String(userId));
+      if (existing) {
+        existing._homeLat = parsed.lat;
+        existing._homeLng = parsed.lng;
+        existing.latitude = parsed.lat;
+        existing.longitude = parsed.lng;
+        existing.distance = 0;
+        existing.outsideRadius = false;
+        existing.timestamp = new Date().toISOString();
+        devLocationStore.set(String(userId), existing);
+      } else {
+        // Create a fresh entry with the given position as home
+        devLocationStore.set(String(userId), {
+          userId: String(userId),
+          latitude: parsed.lat,
+          longitude: parsed.lng,
+          _homeLat: parsed.lat,
+          _homeLng: parsed.lng,
+          accuracy: 5,
+          distance: 0,
+          outsideRadius: false,
+          timestamp: new Date().toISOString(),
+        });
+      }
+      console.log(`[Location] Home reset for user ${userId} → ${parsed.lat.toFixed(6)}, ${parsed.lng.toFixed(6)}`);
+      return res.json({ success: true, message: 'Home location reset (dev mode)' });
+    }
+
+    // Authenticated mode: reset homeLocation on the User model
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid userId' });
+    }
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    user.homeLocation = { latitude: parsed.lat, longitude: parsed.lng };
+    user.alertActive = false;
+    await user.save();
+
+    return res.json({ success: true, message: 'Home location reset' });
+  } catch (err) {
+    console.error('[Location] Reset-home error:', err.message);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
