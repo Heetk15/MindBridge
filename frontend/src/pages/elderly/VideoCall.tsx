@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, User, X } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, User, X, Send } from 'lucide-react';
 import { useTwilioVideo } from '../../hooks/useTwilioVideo';
 import Room from '../../components/video/Room';
 import { Button } from '../../components/ui/button';
@@ -18,8 +18,9 @@ const ElderlyVideoCall = () => {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [callTime, setCallTime] = useState(0);
+    const chatEndRef = useRef<HTMLDivElement>(null);
 
-    const { activeCallId, callStatus } = useCallStore();
+    const { activeCallId, callStatus, peerInfo, chatMessages } = useCallStore();
 
     // Room name is passed directly from signaling (e.g. consultation-abc123)
     const roomName = id || 'default';
@@ -46,10 +47,7 @@ const ElderlyVideoCall = () => {
         }
     });
 
-    const mockMessages = [
-        { id: 1, sender: 'doctor', text: 'Hello! How are you feeling today?', time: '10:01 AM' },
-        { id: 2, sender: 'patient', text: 'I have been experiencing headaches for the past 2 days.', time: '10:02 AM' },
-    ];
+    const mockMessages: never[] = [];
 
     useEffect(() => {
         connectToRoom();
@@ -59,6 +57,17 @@ const ElderlyVideoCall = () => {
             clearInterval(timer);
         };
     }, []);
+
+    // Auto-scroll chat to bottom
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [chatMessages]);
+
+    const handleSendMessage = () => {
+        if (!message.trim() || !peerInfo) return;
+        callActions.sendChatMessage(peerInfo.userId, message);
+        setMessage('');
+    };
 
     const handleToggleAudio = () => {
         toggleAudio();
@@ -131,8 +140,8 @@ const ElderlyVideoCall = () => {
                             <User className="h-6 w-6 text-primary" />
                         </div>
                         <div>
-                            <p className="font-bold text-white text-lg">Dr. Anita Sharma</p>
-                            <p className="text-sm text-gray-400">MindBridge Healthcare Professional</p>
+                            <p className="font-bold text-white text-lg">{peerInfo?.name || 'Caregiver'}</p>
+                            <p className="text-sm text-gray-400">MindBridge {peerInfo?.role === 'caregiver' ? 'Caregiver' : 'User'}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -218,16 +227,19 @@ const ElderlyVideoCall = () => {
                                 <X className="h-6 w-6" />
                             </Button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10">
-                            {mockMessages.map((msg) => (
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
+                            {chatMessages.length === 0 && (
+                                <p className="text-center text-gray-500 text-sm py-8">No messages yet. Say hello!</p>
+                            )}
+                            {chatMessages.map((msg) => (
                                 <div
                                     key={msg.id}
-                                    className={cn('flex flex-col', msg.sender === 'patient' ? 'items-end' : 'items-start')}
+                                    className={cn('flex flex-col', msg.isMine ? 'items-end' : 'items-start')}
                                 >
                                     <div
                                         className={cn(
                                             'max-w-[85%] rounded-2xl px-4 py-3 shadow-md',
-                                            msg.sender === 'patient'
+                                            msg.isMine
                                                 ? 'bg-primary text-primary-foreground rounded-br-none'
                                                 : 'bg-gray-700 text-white rounded-bl-none border border-white/10'
                                         )}
@@ -235,10 +247,11 @@ const ElderlyVideoCall = () => {
                                         <p className="text-sm font-medium leading-relaxed">{msg.text}</p>
                                     </div>
                                     <p className="text-[10px] mt-1.5 font-bold uppercase tracking-widest opacity-40 text-white">
-                                        {msg.time}
+                                        {msg.isMine ? 'You' : msg.senderName} • {msg.timestamp}
                                     </p>
                                 </div>
                             ))}
+                            <div ref={chatEndRef} />
                         </div>
                         <div className="p-6 border-t border-white/10 bg-gray-900/50">
                             <div className="flex gap-3">
@@ -247,9 +260,9 @@ const ElderlyVideoCall = () => {
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     className="flex-1 bg-gray-700/50 border-white/10 text-white placeholder:text-gray-500 focus:ring-primary/20 h-12"
-                                    onKeyPress={(e) => {
+                                    onKeyDown={(e) => {
                                         if (e.key === 'Enter' && message.trim()) {
-                                            setMessage('');
+                                            handleSendMessage();
                                         }
                                     }}
                                 />
@@ -257,8 +270,9 @@ const ElderlyVideoCall = () => {
                                     size="icon"
                                     className="bg-primary hover:bg-primary/90 h-12 w-12 shadow-lg"
                                     disabled={!message.trim()}
+                                    onClick={handleSendMessage}
                                 >
-                                    <MessageSquare className="h-5 w-5" />
+                                    <Send className="h-5 w-5" />
                                 </Button>
                             </div>
                         </div>

@@ -1,4 +1,4 @@
-import { Video, Mic, MicOff, VideoOff, Phone, FileText, Edit, Heart, Thermometer, Activity, X, MessageSquare } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Phone, FileText, Edit, Heart, Thermometer, Activity, X, MessageSquare, Brain, Clock, Send } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTwilioVideo } from '../../hooks/useTwilioVideo';
@@ -22,6 +22,7 @@ const CaregiverVideoCall = () => {
     const [showPrescription, setShowPrescription] = useState(false);
     const [message, setMessage] = useState('');
     const [callTime, setCallTime] = useState(0);
+    const chatEndRef = useRef<HTMLDivElement>(null);
 
     const [diagnosis, setDiagnosis] = useState("");
     const [severity, setSeverity] = useState("mild");
@@ -30,7 +31,7 @@ const CaregiverVideoCall = () => {
     ]);
     const [advice, setAdvice] = useState("");
 
-    const { activeCallId, callStatus } = useCallStore();
+    const { activeCallId, callStatus, peerInfo, chatMessages } = useCallStore();
 
     // Room name is passed directly from signaling (e.g. consultation-abc123)
     const roomName = id || 'default';
@@ -57,10 +58,7 @@ const CaregiverVideoCall = () => {
         }
     });
 
-    const mockMessages = [
-        { id: 1, sender: 'doctor', text: 'Hello! How are you feeling today?', time: '10:01 AM' },
-        { id: 2, sender: 'patient', text: 'I have been experiencing headaches for the past 2 days.', time: '10:02 AM' },
-    ];
+    const mockMessages: never[] = [];
 
     useEffect(() => {
         connectToRoom();
@@ -70,6 +68,17 @@ const CaregiverVideoCall = () => {
             clearInterval(timer);
         };
     }, []);
+
+    // Auto-scroll chat
+    useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [chatMessages]);
+
+    const handleSendMessage = () => {
+        if (!message.trim() || !peerInfo) return;
+        callActions.sendChatMessage(peerInfo.userId, message);
+        setMessage('');
+    };
 
     const handleToggleAudio = () => {
         toggleAudio();
@@ -234,8 +243,8 @@ const CaregiverVideoCall = () => {
             <div className="w-full lg:w-96 bg-white border-l border-gray-200 flex flex-col">
                 {/* Header */}
                 <div className="p-6 border-b border-gray-200">
-                    <h3 className="font-display text-xl font-semibold text-gray-900">Patient Information</h3>
-                    <p className="text-sm text-gray-600 mt-0.5">Real-time vitals and history</p>
+                    <h3 className="font-display text-xl font-semibold text-gray-900">Elderly Overview</h3>
+                    <p className="text-sm text-gray-600 mt-0.5">MindBridge companion insights</p>
                 </div>
 
                 {/* Content */}
@@ -243,38 +252,95 @@ const CaregiverVideoCall = () => {
                     {/* Patient Details */}
                     <div className="rounded-lg p-4 border border-gray-200 bg-gray-50">
                         <div className="mb-3">
-                            <p className="font-semibold text-gray-900">Kriya Mehta</p>
-                            <p className="text-sm text-gray-600">Age: 72 • Female</p>
+                            <p className="font-semibold text-gray-900">{peerInfo?.name || 'Elderly User'}</p>
+                            <p className="text-sm text-gray-600 capitalize">{peerInfo?.role || 'elderly'}</p>
                         </div>
                         <div className="text-xs text-gray-600">
-                            Blood Group: B+ • High Blood Pressure
+                            Connected via MindBridge Video Call
                         </div>
                     </div>
 
-                    {/* Vital Signs */}
+                    {/* Cognitive & Wellness */}
                     <div className="space-y-3">
-                        <h4 className="font-semibold text-gray-900 text-sm italic">Vital Signs</h4>
+                        <h4 className="font-semibold text-gray-900 text-sm italic">Wellness Indicators</h4>
                         <div className="rounded-lg p-4 space-y-3 border border-gray-200">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <Heart className="h-4 w-4 text-red-500" />
-                                    <span className="text-sm text-gray-700">Heart Rate</span>
+                                    <Brain className="h-4 w-4 text-purple-500" />
+                                    <span className="text-sm text-gray-700">Cognitive Score</span>
                                 </div>
-                                <span className="text-sm font-semibold text-gray-900">72 bpm</span>
+                                <span className="text-sm font-semibold text-gray-900">74 / 100</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Heart className="h-4 w-4 text-red-500" />
+                                    <span className="text-sm text-gray-700">Mood Trend</span>
+                                </div>
+                                <span className="text-sm font-semibold text-green-600">Stable</span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <Activity className="h-4 w-4 text-primary" />
-                                    <span className="text-sm text-gray-700">BP</span>
+                                    <span className="text-sm text-gray-700">Loneliness Index</span>
                                 </div>
-                                <span className="text-sm font-semibold text-gray-900">130/85 mmHg</span>
+                                <span className="text-sm font-semibold text-yellow-600">Moderate</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Clock className="h-4 w-4 text-blue-500" />
+                                    <span className="text-sm text-gray-700">Last Chat</span>
+                                </div>
+                                <span className="text-sm font-semibold text-gray-900">Today</span>
                             </div>
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <Thermometer className="h-4 w-4 text-orange-500" />
-                                    <span className="text-sm text-gray-700">Temp</span>
+                                    <span className="text-sm text-gray-700">Medication</span>
                                 </div>
-                                <span className="text-sm font-semibold text-gray-900">98.6°F</span>
+                                <span className="text-sm font-semibold text-green-600">On track</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* In-call Chat (inline) */}
+                    <div className="space-y-3 border-t border-gray-200 pt-4">
+                        <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4 text-primary" />
+                            In-Call Chat
+                        </h4>
+                        <div className="rounded-lg border border-gray-200 bg-gray-50 flex flex-col h-48">
+                            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                                {chatMessages.length === 0 && (
+                                    <p className="text-center text-gray-400 text-xs py-4">No messages yet</p>
+                                )}
+                                {chatMessages.map((msg) => (
+                                    <div key={msg.id} className={cn('flex flex-col', msg.isMine ? 'items-end' : 'items-start')}>
+                                        <div className={cn(
+                                            'max-w-[85%] rounded-xl px-3 py-2 text-xs',
+                                            msg.isMine
+                                                ? 'bg-primary text-white rounded-br-none'
+                                                : 'bg-white text-gray-900 border border-gray-200 rounded-bl-none'
+                                        )}>
+                                            {msg.text}
+                                        </div>
+                                        <span className="text-[9px] text-gray-400 mt-0.5">
+                                            {msg.isMine ? 'You' : msg.senderName} • {msg.timestamp}
+                                        </span>
+                                    </div>
+                                ))}
+                                <div ref={chatEndRef} />
+                            </div>
+                            <div className="flex gap-2 p-2 border-t border-gray-200">
+                                <Input
+                                    placeholder="Message..."
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    className="flex-1 h-8 text-xs"
+                                    onKeyDown={(e) => { if (e.key === 'Enter' && message.trim()) handleSendMessage(); }}
+                                />
+                                <Button size="icon" className="h-8 w-8" disabled={!message.trim()} onClick={handleSendMessage}>
+                                    <Send className="h-3.5 w-3.5" />
+                                </Button>
                             </div>
                         </div>
                     </div>

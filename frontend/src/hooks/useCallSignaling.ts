@@ -11,6 +11,11 @@ export const callActions = {
     if (!user) return;
     // Store calleeId immediately so cancel works
     useCallStore.setState({ calleeId });
+    // Store peer info from online users list
+    const peer = useCallStore.getState().onlineUsers.find((u) => u.userId === calleeId);
+    if (peer) {
+      useCallStore.getState().setPeerInfo({ userId: peer.userId, name: peer.name, role: peer.role });
+    }
     const socket = getSocket();
     socket.emit('call:initiate', {
       calleeId,
@@ -21,6 +26,15 @@ export const callActions = {
   },
 
   acceptCall: (callId: string, roomName: string, callerId: string) => {
+    // Store the caller as peer info before accepting
+    const incoming = useCallStore.getState().incomingCall;
+    if (incoming) {
+      useCallStore.getState().setPeerInfo({
+        userId: incoming.callerId,
+        name: incoming.callerName,
+        role: incoming.callerRole as 'elderly' | 'caregiver',
+      });
+    }
     const socket = getSocket();
     socket.emit('call:accept', { callId, roomName, callerId });
   },
@@ -41,6 +55,28 @@ export const callActions = {
     const socket = getSocket();
     socket.emit('call:end', { callId, otherUserId });
     useCallStore.getState().setCallEnded();
+  },
+
+  sendChatMessage: (toUserId: string, text: string) => {
+    const user = useAuthStore.getState().user;
+    if (!user || !text.trim()) return;
+    const socket = getSocket();
+    const msg = {
+      toUserId,
+      text: text.trim(),
+      senderName: user.name,
+      senderRole: user.role,
+    };
+    socket.emit('chat:send', msg);
+    // Add to local store immediately
+    useCallStore.getState().addChatMessage({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      senderName: user.name,
+      senderRole: user.role,
+      text: text.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isMine: true,
+    });
   },
 };
 
@@ -114,6 +150,17 @@ export const useCallSignaling = () => {
       useCallStore.getState().resetCall();
     };
 
+    const onChatReceive = (data: any) => {
+      useCallStore.getState().addChatMessage({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        senderName: data.senderName,
+        senderRole: data.senderRole,
+        text: data.text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isMine: false,
+      });
+    };
+
     socket.on('users:online', onOnlineUsers);
     socket.on('call:incoming', onIncoming);
     socket.on('call:ringing', onRinging);
@@ -122,6 +169,7 @@ export const useCallSignaling = () => {
     socket.on('call:ended', onEnded);
     socket.on('call:cancelled', onCancelled);
     socket.on('call:error', onError);
+    socket.on('chat:receive', onChatReceive);
 
     // Request initial online users
     socket.emit('users:getOnline');
@@ -136,6 +184,7 @@ export const useCallSignaling = () => {
       socket.off('call:ended', onEnded);
       socket.off('call:cancelled', onCancelled);
       socket.off('call:error', onError);
+      socket.off('chat:receive', onChatReceive);
     };
   }, [user]);
 

@@ -25,6 +25,13 @@ function initializeSocket(io) {
         socketId: socket.id,
       };
 
+      // If this userId was already online on a different socket, remove the stale entry
+      const existingSocketId = userSocketMap.get(userData.userId);
+      if (existingSocketId && existingSocketId !== socket.id) {
+        onlineUsers.delete(existingSocketId);
+        console.log(`🔄 Removed stale socket [${existingSocketId}] for ${userData.name}`);
+      }
+
       onlineUsers.set(socket.id, userInfo);
       userSocketMap.set(userData.userId, socket.id);
 
@@ -181,13 +188,27 @@ function initializeSocket(io) {
       }
     });
 
+    // ── In-call chat message ──
+    socket.on('chat:send', (data) => {
+      // data = { toUserId, text, senderName, senderRole }
+      const recipientSocketId = userSocketMap.get(data.toUserId);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit('chat:receive', {
+          text: data.text,
+          senderName: data.senderName,
+          senderRole: data.senderRole,
+        });
+      }
+    });
+
     // ── Get online users ──
     socket.on('users:getOnline', () => {
-      const callerInfo = onlineUsers.get(socket.id);
+      const seen = new Set();
       const users = [];
       onlineUsers.forEach((user) => {
-        // Don't include the requesting user
-        if (user.socketId !== socket.id) {
+        // Don't include the requesting user, and deduplicate by userId
+        if (user.socketId !== socket.id && !seen.has(user.userId)) {
+          seen.add(user.userId);
           users.push({
             userId: user.userId,
             name: user.name,
@@ -212,13 +233,17 @@ function initializeSocket(io) {
 }
 
 function broadcastOnlineUsers(io) {
+  const seen = new Set();
   const users = [];
   onlineUsers.forEach((user) => {
-    users.push({
-      userId: user.userId,
-      name: user.name,
-      role: user.role,
-    });
+    if (!seen.has(user.userId)) {
+      seen.add(user.userId);
+      users.push({
+        userId: user.userId,
+        name: user.name,
+        role: user.role,
+      });
+    }
   });
   io.emit('users:online', users);
 }

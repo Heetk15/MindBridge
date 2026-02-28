@@ -14,6 +14,21 @@ export interface IncomingCall {
   callerId: string;
 }
 
+export interface PeerInfo {
+  userId: string;
+  name: string;
+  role: 'elderly' | 'caregiver';
+}
+
+export interface ChatMessage {
+  id: string;
+  senderName: string;
+  senderRole: string;
+  text: string;
+  timestamp: string;
+  isMine: boolean;
+}
+
 interface CallState {
   // Online users
   onlineUsers: OnlineUser[];
@@ -28,6 +43,14 @@ interface CallState {
   activeRoomName: string | null;
   callStatus: 'idle' | 'ringing' | 'outgoing-ringing' | 'accepted' | 'in-call' | 'ended' | 'rejected';
   calleeId: string | null;
+
+  // Peer info (who you're talking to)
+  peerInfo: PeerInfo | null;
+  setPeerInfo: (peer: PeerInfo | null) => void;
+
+  // In-call chat messages
+  chatMessages: ChatMessage[];
+  addChatMessage: (msg: ChatMessage) => void;
 
   // Actions
   setOutgoingCall: (callId: string, roomName: string, calleeId: string) => void;
@@ -49,6 +72,12 @@ export const useCallStore = create<CallState>((set) => ({
   activeRoomName: null,
   callStatus: 'idle',
   calleeId: null,
+
+  peerInfo: null,
+  setPeerInfo: (peer) => set({ peerInfo: peer }),
+
+  chatMessages: [],
+  addChatMessage: (msg) => set((state) => ({ chatMessages: [...state.chatMessages, msg] })),
 
   setOutgoingCall: (callId, roomName, calleeId) =>
     set({
@@ -72,6 +101,8 @@ export const useCallStore = create<CallState>((set) => ({
       activeCallId: null,
       activeRoomName: null,
       calleeId: null,
+      peerInfo: null,
+      chatMessages: [],
     }),
 
   setCallEnded: () =>
@@ -81,6 +112,8 @@ export const useCallStore = create<CallState>((set) => ({
       activeRoomName: null,
       calleeId: null,
       incomingCall: null,
+      peerInfo: null,
+      chatMessages: [],
     }),
 
   setCallCancelled: () =>
@@ -90,6 +123,8 @@ export const useCallStore = create<CallState>((set) => ({
       activeRoomName: null,
       calleeId: null,
       incomingCall: null,
+      peerInfo: null,
+      chatMessages: [],
     }),
 
   resetCall: () =>
@@ -99,5 +134,7 @@ export const useCallStore = create<CallState>((set) => ({
       callStatus: 'idle',
       calleeId: null,
       incomingCall: null,
+      peerInfo: null,
+      chatMessages: [],
     }),
 }));
