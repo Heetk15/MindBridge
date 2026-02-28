@@ -5,7 +5,8 @@ const emergencyLogSchema = new mongoose.Schema(
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
-            required: true,
+            required: false,
+            default: '000000000000000000000001',
             index: true,
         },
         alertType: {

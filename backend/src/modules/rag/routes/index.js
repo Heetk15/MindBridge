@@ -1,7 +1,18 @@
 const express = require('express')
+const multer = require('multer')
 const RAGController = require('../controllers/RAGController')
 
 const router = express.Router()
+
+// Multer config: store PDF in memory (up to 10MB)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') cb(null, true)
+    else cb(new Error('Only PDF files are allowed'))
+  },
+})
 
 /**
  * RAG Routes
@@ -37,6 +48,12 @@ router.post('/tags', RAGController.searchByTags)
  * Get knowledge base statistics
  */
 router.get('/stats', RAGController.getStats)
+
+/**
+ * POST /api/rag/upload
+ * Upload text or PDF to knowledge base
+ */
+router.post('/upload', upload.single('file'), RAGController.uploadDocument)
 
 /**
  * POST /api/rag/documents

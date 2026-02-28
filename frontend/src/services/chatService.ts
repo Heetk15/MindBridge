@@ -63,12 +63,22 @@ const chatService = {
    * @param {string} conversationId - Conversation ID
    * @returns {Promise<any[]>} - Array of messages
    */
-  getConversation: async (conversationId: string): Promise<any[]> => {
+  getConversation: async (conversationId: string): Promise<any> => {
     try {
-      const response = await axios.get(
-        `${API_URL}/chatbot/conversation/${conversationId}`
-      )
-      return response.data.messages
+      const response = await axios.get(`${API_URL}/chatbot/conversation/${conversationId}`)
+      return response.data
+    } catch (error: any) {
+      throw {
+        message: error.response?.data?.error || error.message,
+        status: error.response?.status,
+      }
+    }
+  },
+
+  getConversations: async (): Promise<any> => {
+    try {
+      const response = await axios.get(`${API_URL}/chatbot/conversations`)
+      return response.data
     } catch (error: any) {
       throw {
         message: error.response?.data?.error || error.message,
@@ -84,7 +94,7 @@ const chatService = {
   createConversation: async (): Promise<string> => {
     try {
       const response = await axios.post(`${API_URL}/chatbot/conversation`)
-      return response.data
+      return response.data.conversationId as string
     } catch (error: any) {
       throw {
         message: error.response?.data?.error || error.message,

@@ -1,6 +1,8 @@
+const path = require('path')
 const RAGService = require('../services/RAGService')
 const DocumentIngestionService = require('../services/DocumentIngestionService')
 const chromaDB = require('../services/ChromaDBService')
+const { PDFParse } = require('pdf-parse')
 
 /**
  * RAG Controller
@@ -173,6 +175,90 @@ class RAGController {
       })
     } catch (error) {
       console.error('Add document error:', error)
+      res.status(500).json({ error: error.message })
+    }
+  }
+
+  /**
+   * Upload PDF or text file to knowledge base
+   * POST /api/rag/upload
+   */
+  static async uploadDocument(req, res) {
+    try {
+      // Handle text upload
+      if (req.body.content) {
+        const { content, title, category = 'user-uploads' } = req.body
+
+        if (!content || content.trim().length < 10) {
+          return res.status(400).json({ error: 'Content is too short' })
+        }
+
+        const source = `user-${Date.now()}-${(title || 'document').replace(/\s+/g, '-').toLowerCase()}.txt`
+
+        const result = await DocumentIngestionService.addDocument(content, {
+          source,
+          category,
+          title: title || 'User Upload',
+          date_added: new Date().toISOString(),
+          tags: ['user-upload', category],
+        })
+
+        return res.json({
+          success: true,
+          message: 'Text added to knowledge base',
+          source,
+          chunksAdded: result.chunksAdded,
+        })
+      }
+
+      // Handle PDF upload
+      if (req.file) {
+        const parser = new PDFParse({ data: req.file.buffer })
+        let content = ''
+        let numPages = 1
+        try {
+          const textResult = await parser.getText()
+          content = textResult.text || ''
+        } catch (e) {
+          // fallback: try getInfo with text
+          const infoResult = await parser.getInfo()
+          content = infoResult.text || ''
+          numPages = infoResult.total || 1
+        }
+        try {
+          const infoResult = await parser.getInfo()
+          numPages = infoResult.total || 1
+        } catch (e) { /* ignore - page count is optional */ }
+        await parser.destroy().catch(() => {})
+
+        if (!content || content.trim().length < 10) {
+          return res.status(400).json({ error: 'PDF has no readable text' })
+        }
+
+        const originalName = req.file.originalname.replace(/\.pdf$/i, '')
+        const source = `pdf-${Date.now()}-${originalName.replace(/\s+/g, '-').toLowerCase()}.txt`
+        const category = req.body.category || 'user-uploads'
+
+        const result = await DocumentIngestionService.addDocument(content, {
+          source,
+          category,
+          title: originalName,
+          date_added: new Date().toISOString(),
+          tags: ['pdf-upload', category],
+        })
+
+        return res.json({
+          success: true,
+          message: `PDF "${originalName}" added to knowledge base`,
+          source,
+          pages: numPages,
+          chunksAdded: result.chunksAdded,
+        })
+      }
+
+      return res.status(400).json({ error: 'No content or file provided' })
+    } catch (error) {
+      console.error('Upload document error:', error)
       res.status(500).json({ error: error.message })
     }
   }

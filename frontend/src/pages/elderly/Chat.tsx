@@ -3,11 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import {
   FiSend,
   FiArrowLeft,
+  FiDatabase,
 } from 'react-icons/fi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChatStore } from '../../store/chatStore'
 import ChatMessage from '../../components/Chatbot/ChatMessage'
 import VoiceRecorder from '../../components/Chatbot/VoiceRecorder'
+import KnowledgeBaseModal from '../../components/Chatbot/KnowledgeBaseModal'
+import EmergencyBanner from '../../components/emergency/EmergencyBanner'
+import { triggerEmergency } from '../../services/emergencyService'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api'
 
 function ChatbotPage() {
   const navigate = useNavigate()
@@ -16,13 +22,50 @@ function ChatbotPage() {
     isTyping,
     error,
     conversationId,
+    emergency,
     sendMessage,
     sendVoiceMessage,
     clearMessages,
+    clearEmergency,
   } = useChatStore()
 
   const [inputText, setInputText] = useState('')
   const [useVoice, setUseVoice] = useState(false)
+  const [showKBModal, setShowKBModal] = useState(false)
+
+  // ── Emergency confirmation handlers ─────────────────────────────────────
+  const handleEmergencyConfirm = async () => {
+    try {
+      const userId = conversationId || 'anonymous'
+      const res = await fetch(`${API_URL}/v1/alerts/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, reply: 'yes', userMeta: { name: 'User' } }),
+      })
+      const data = await res.json()
+      // If success, auto-send the result as an AI message update
+      if (data.message) await sendMessage(data.message)
+    } catch (err) {
+      console.error('Emergency confirm error:', err)
+    } finally {
+      clearEmergency()
+    }
+  }
+
+  const handleEmergencyCancel = async () => {
+    try {
+      const userId = conversationId || 'anonymous'
+      await fetch(`${API_URL}/v1/alerts/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, reply: 'no' }),
+      })
+    } catch (err) {
+      console.error('Emergency cancel error:', err)
+    } finally {
+      clearEmergency()
+    }
+  }
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -85,6 +128,14 @@ function ChatbotPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowKBModal(true)}
+              className="p-3 hover:bg-secondary rounded-xl transition-all font-medium text-primary flex items-center gap-2"
+              title="Add to Knowledge Base"
+            >
+              <FiDatabase size={18} />
+              <span className="hidden sm:inline text-sm">Add Knowledge</span>
+            </button>
             {messages.length > 0 && (
               <button
                 onClick={clearMessages}
@@ -97,6 +148,20 @@ function ChatbotPage() {
             )}
           </div>
         </header>
+
+        {/* Emergency Banner */}
+        <AnimatePresence>
+          {emergency?.detected && (
+            <div className="px-8 pt-4">
+              <EmergencyBanner
+                emergency={emergency}
+                onDismiss={clearEmergency}
+                onConfirm={handleEmergencyConfirm}
+                onCancel={handleEmergencyCancel}
+              />
+            </div>
+          )}
+        </AnimatePresence>
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-8 py-8 space-y-6 scrollbar-thin scrollbar-thumb-primary/10 hover:scrollbar-thumb-primary/20 transition-all">
@@ -226,6 +291,9 @@ function ChatbotPage() {
           </p>
         </div>
       </div>
+
+      {/* Knowledge Base Modal */}
+      <KnowledgeBaseModal isOpen={showKBModal} onClose={() => setShowKBModal(false)} />
     </div>
   )
 }
