@@ -9,13 +9,12 @@ import { useCognitiveStore } from '@/store/cognitiveStore';
 import { Link } from 'react-router-dom';
 import { Gamepad2, MessageCircle, Activity, Heart, Video } from 'lucide-react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import OnlineUsersCard from '@/components/video/OnlineUsersCard';
 
 const quickLinks = [
   { to: '/elderly/chat', icon: MessageCircle, label: 'Chat', color: 'bg-primary/10 text-primary' },
-  { to: '/elderly/video-call/current', icon: Video, label: 'Video Call', color: 'bg-indigo-500/10 text-indigo-500' },
   { to: '/elderly/games', icon: Gamepad2, label: 'Games', color: 'bg-success/10 text-success' },
   { to: '/elderly/activity', icon: Activity, label: 'Activity', color: 'bg-accent/10 text-accent' },
-  // { to: '/elderly/health-passport', icon: Heart, label: 'Health', color: 'bg-warning/10 text-warning' },
 ];
 
 const ElderlyDashboard = () => {
@@ -57,6 +56,9 @@ const ElderlyDashboard = () => {
         </div>
 
         <HealthMetrics />
+
+        <h2 className="text-xl font-display font-semibold text-foreground mb-4">Video Call</h2>
+        <OnlineUsersCard filterRole="caregiver" className="mb-6" />
       </div>
       <PanicButton />
     </AuthenticatedLayout>

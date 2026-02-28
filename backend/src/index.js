@@ -1,7 +1,11 @@
-require('dotenv').config()
+const path = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') })
+const http = require('http')
+const { Server } = require('socket.io')
 const app = require('./app')
 const initializeRAGModule = require('./modules/rag/init')
 const { connectDB } = require('./config/database')
+const { initializeSocket } = require('./socket/callSignaling')
 
 const PORT = process.env.PORT || 5004
 let server = null
@@ -15,11 +19,37 @@ const startServer = async () => {
     // Initialize RAG module
     await initializeRAGModule()
 
-    // Start server
-    server = app.listen(PORT, () => {
+    // Create HTTP server from Express app
+    server = http.createServer(app)
+
+    // Initialize Socket.io with CORS for LAN access
+    const io = new Server(server, {
+      cors: {
+        origin: function (origin, callback) {
+          // Allow all local network origins for LAN video calls
+          if (!origin || origin.match(/^https?:\/\/(localhost|127\.0\.0\.1|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/)) {
+            callback(null, true)
+          } else {
+            callback(null, true) // Allow all in dev
+          }
+        },
+        credentials: true,
+      },
+    })
+
+    // Initialize real-time call signaling
+    initializeSocket(io)
+
+    // Make io accessible from routes if needed
+    app.set('io', io)
+
+    // Start server on all interfaces (0.0.0.0) for LAN access
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 MindBridge Server running on port ${PORT}`)
       console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`)
       console.log(`💾 Database: Connected`)
+      console.log(`🔌 Socket.io: Ready for video call signaling`)
+      console.log(`🌐 LAN Access: http://<your-ip>:${PORT}`)
     })
 
     // Handle graceful shutdown

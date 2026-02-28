@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { AuthResponse, PhoneAuthPayload } from '@/types/user.types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5005/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:5004/api/v1`;
 
 const authClient = axios.create({
   baseURL: `${API_BASE_URL}/auth`,

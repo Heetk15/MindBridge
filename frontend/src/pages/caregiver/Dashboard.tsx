@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Video, Activity } from 'lucide-react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
+import OnlineUsersCard from '@/components/video/OnlineUsersCard';
 import { motion } from 'framer-motion';
 
 const CaregiverDashboard = () => (
@@ -23,10 +24,10 @@ const CaregiverDashboard = () => (
             <h3 className="font-display font-semibold text-foreground text-lg">Quick Actions</h3>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Link to="/caregiver/video-call/new">
+            <Link to="/caregiver/alerts">
               <Button className="w-full flex flex-col h-auto py-6 gap-2 bg-indigo-600 hover:bg-indigo-700">
                 <Video size={24} />
-                <span>Start Video Call</span>
+                <span>View Alerts</span>
               </Button>
             </Link>
             <Link to="/caregiver/alerts">
@@ -43,6 +44,7 @@ const CaregiverDashboard = () => (
         <MedicationCompliance />
         <LonelinessIndex />
         <RecentConversations />
+        <OnlineUsersCard filterRole="elderly" />
       </div>
     </div>
   </AuthenticatedLayout>

@@ -9,23 +9,31 @@ const app = express()
 // Security Middleware
 app.use(helmet())
 
-// CORS Configuration
+// CORS Configuration - Allow LAN access for cross-device video calls
 app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175',
-      'http://localhost:3000',
-      'http://localhost:8080',
-      'http://localhost:8081',
-      process.env.CLIENT_URL
-    ]
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true)
-    } else {
-      callback(new Error('Not allowed by CORS'))
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true)
+    
+    // Allow localhost on any port
+    if (origin.match(/^https?:\/\/localhost(:\d+)?$/)) return callback(null, true)
+    
+    // Allow any private network IP (LAN access for video calls)
+    if (origin.match(/^https?:\/\/(127\.0\.0\.1|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+)(:\d+)?$/)) {
+      return callback(null, true)
     }
+
+    // Allow configured CLIENT_URL
+    if (process.env.CLIENT_URL && origin === process.env.CLIENT_URL) {
+      return callback(null, true)
+    }
+
+    // In development, allow all
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true)
+    }
+
+    callback(new Error('Not allowed by CORS'))
   },
   credentials: true,
 }))

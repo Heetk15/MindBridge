@@ -1,5 +1,5 @@
 import { Video, Mic, MicOff, VideoOff, Phone, FileText, Edit, Heart, Thermometer, Activity, X, MessageSquare } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useTwilioVideo } from '../../hooks/useTwilioVideo';
 import Room from '../../components/video/Room';
@@ -7,6 +7,8 @@ import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Input } from '../../components/ui/input';
 import { cn } from '../../lib/utils';
+import { useCallStore } from '../../store/callStore';
+import { callActions } from '../../hooks/useCallSignaling';
 import axios from 'axios';
 
 const CaregiverVideoCall = () => {
@@ -28,8 +30,12 @@ const CaregiverVideoCall = () => {
     ]);
     const [advice, setAdvice] = useState("");
 
-    const roomName = `consultation-${id || 'default'}`;
-    const identity = `caregiver-${Date.now()}`;
+    const { activeCallId, callStatus } = useCallStore();
+
+    // Room name is passed directly from signaling (e.g. consultation-abc123)
+    const roomName = id || 'default';
+    const identityRef = useRef(`caregiver-${Date.now()}`);
+    const identity = identityRef.current;
 
     const {
         room,
@@ -77,8 +83,19 @@ const CaregiverVideoCall = () => {
 
     const handleEndCall = () => {
         disconnectFromRoom();
+        if (activeCallId) {
+            callActions.endCall(activeCallId, '');
+        }
         navigate('/caregiver/dashboard');
     };
+
+    // Listen for call ended by other side
+    useEffect(() => {
+        if (callStatus === 'ended') {
+            disconnectFromRoom();
+            navigate('/caregiver/dashboard');
+        }
+    }, [callStatus]);
 
     const handleSavePrescription = async () => {
         if (!diagnosis.trim()) {
@@ -92,7 +109,7 @@ const CaregiverVideoCall = () => {
         }
 
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5004/api'}/prescriptions`, {
+            await axios.post(`${import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5004/api`}/prescriptions`, {
                 patientId: '65de1234567890abcdef1234', // Mock patient ID or get from appointment
                 diagnosis,
                 severity,

@@ -7,46 +7,68 @@ interface RoomProps {
     participants: Participant[];
 }
 
-const ParticipantTrack = ({ participant }: { participant: Participant }) => {
+const ParticipantTrack = ({ participant, isLocal = false }: { participant: Participant; isLocal?: boolean }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
 
     useEffect(() => {
-        const trackSubscribed = (track: any) => {
-            if (track.kind === 'video') {
+        const attachTrack = (track: any) => {
+            if (track.kind === 'video' && videoRef.current) {
                 track.attach(videoRef.current);
-            } else if (track.kind === 'audio') {
+            } else if (track.kind === 'audio' && audioRef.current) {
                 track.attach(audioRef.current);
             }
         };
 
-        const trackUnsubscribed = (track: any) => {
+        const detachTrack = (track: any) => {
             track.detach();
         };
 
-        participant.on('trackSubscribed', trackSubscribed);
-        participant.on('trackUnsubscribed', trackUnsubscribed);
-
-        participant.tracks.forEach(publication => {
-            const pub = publication as any;
-            if (pub.isSubscribed && pub.track) {
-                trackSubscribed(pub.track);
+        // For local participant, tracks are already available via publication.track
+        // For remote participants, tracks come via trackSubscribed event
+        participant.tracks.forEach((publication: any) => {
+            if (publication.track) {
+                attachTrack(publication.track);
             }
+            // For remote: listen for track to be subscribed
+            publication.on?.('subscribed', attachTrack);
+            publication.on?.('unsubscribed', detachTrack);
         });
 
+        // Listen for new tracks added after initial connection (remote)
+        participant.on('trackSubscribed', attachTrack);
+        participant.on('trackUnsubscribed', detachTrack);
+
+        // Also listen for trackPublished to handle late-arriving publications
+        const handleTrackPublished = (publication: any) => {
+            if (publication.track) {
+                attachTrack(publication.track);
+            }
+            publication.on?.('subscribed', attachTrack);
+            publication.on?.('unsubscribed', detachTrack);
+        };
+        participant.on('trackPublished', handleTrackPublished);
+
         return () => {
-            participant.off('trackSubscribed', trackSubscribed);
-            participant.off('trackUnsubscribed', trackUnsubscribed);
+            participant.off('trackSubscribed', attachTrack);
+            participant.off('trackUnsubscribed', detachTrack);
+            participant.off('trackPublished', handleTrackPublished);
+            // Detach all tracks on cleanup
+            participant.tracks.forEach((publication: any) => {
+                if (publication.track) {
+                    publication.track.detach();
+                }
+            });
         };
     }, [participant]);
 
     return (
         <div className="relative w-full h-full bg-black rounded-xl overflow-hidden shadow-lg border border-white/10 group">
-            <video ref={videoRef} autoPlay className="w-full h-full object-cover" />
-            <audio ref={audioRef} autoPlay />
+            <video ref={videoRef} autoPlay muted={isLocal} playsInline className="w-full h-full object-cover" />
+            {!isLocal && <audio ref={audioRef} autoPlay />}
             <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
                 <p className="text-white text-xs font-medium">
-                    {participant.identity} {(participant as any).isLocal ? '(You)' : ''}
+                    {participant.identity} {isLocal ? '(You)' : ''}
                 </p>
             </div>
         </div>
@@ -58,7 +80,7 @@ const Room: React.FC<RoomProps> = ({ room, participants }) => {
         <div className="w-full h-full p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-900">
             {/* Local Participant */}
             <div className="relative">
-                <ParticipantTrack participant={room.localParticipant} />
+                <ParticipantTrack participant={room.localParticipant} isLocal={true} />
             </div>
 
             {/* Remote Participants */}

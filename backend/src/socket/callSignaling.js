@@ -1,0 +1,226 @@
+/**
+ * Socket.io Call Signaling Module
+ * Handles real-time video call signaling between elderly and caregivers
+ */
+const Call = require('../models/Call');
+const { v4: uuidv4 } = require('uuid');
+
+// Track online users: { socketId: { userId, name, role, socketId } }
+const onlineUsers = new Map();
+
+// Track userId -> socketId mapping for targeted calls
+const userSocketMap = new Map();
+
+function initializeSocket(io) {
+  io.on('connection', (socket) => {
+    console.log(`🔌 Socket connected: ${socket.id}`);
+
+    // ── User comes online ──
+    socket.on('user:online', (userData) => {
+      // userData = { userId, name, role }
+      const userInfo = {
+        userId: userData.userId,
+        name: userData.name,
+        role: userData.role,
+        socketId: socket.id,
+      };
+
+      onlineUsers.set(socket.id, userInfo);
+      userSocketMap.set(userData.userId, socket.id);
+
+      console.log(`✅ ${userData.name} (${userData.role}) came online [${socket.id}]`);
+
+      // Broadcast updated online users list to all
+      broadcastOnlineUsers(io);
+    });
+
+    // ── Initiate a call ──
+    socket.on('call:initiate', async (data) => {
+      // data = { calleeId, callerName, callerRole, callerId }
+      const calleeSocketId = userSocketMap.get(data.calleeId);
+
+      if (!calleeSocketId) {
+        socket.emit('call:error', { message: 'User is offline' });
+        return;
+      }
+
+      const calleeInfo = onlineUsers.get(calleeSocketId);
+      const roomName = `consultation-${uuidv4().slice(0, 8)}`;
+
+      try {
+        // Save call to DB
+        const call = await Call.create({
+          callerId: data.callerId,
+          callerName: data.callerName,
+          callerRole: data.callerRole,
+          calleeId: data.calleeId,
+          calleeName: calleeInfo?.name || 'Unknown',
+          calleeRole: calleeInfo?.role || 'elderly',
+          roomName,
+          status: 'ringing',
+        });
+
+        // Notify caller that call is ringing
+        socket.emit('call:ringing', {
+          callId: call._id,
+          roomName,
+          calleeId: data.calleeId,
+          calleeName: calleeInfo?.name,
+          calleeRole: calleeInfo?.role,
+        });
+
+        // Send incoming call to callee
+        io.to(calleeSocketId).emit('call:incoming', {
+          callId: call._id,
+          roomName,
+          callerName: data.callerName,
+          callerRole: data.callerRole,
+          callerId: data.callerId,
+        });
+
+        console.log(`📞 Call initiated: ${data.callerName} → ${calleeInfo?.name} [Room: ${roomName}]`);
+      } catch (err) {
+        console.error('Call initiation error:', err);
+        socket.emit('call:error', { message: 'Failed to initiate call' });
+      }
+    });
+
+    // ── Accept a call ──
+    socket.on('call:accept', async (data) => {
+      // data = { callId, roomName, callerId }
+      try {
+        await Call.findByIdAndUpdate(data.callId, {
+          status: 'accepted',
+          startedAt: new Date(),
+        });
+
+        const callerSocketId = userSocketMap.get(data.callerId);
+        if (callerSocketId) {
+          io.to(callerSocketId).emit('call:accepted', {
+            callId: data.callId,
+            roomName: data.roomName,
+          });
+        }
+
+        // Also confirm to the callee
+        socket.emit('call:accepted', {
+          callId: data.callId,
+          roomName: data.roomName,
+        });
+
+        console.log(`✅ Call accepted [${data.callId}]`);
+      } catch (err) {
+        console.error('Call accept error:', err);
+      }
+    });
+
+    // ── Reject a call ──
+    socket.on('call:reject', async (data) => {
+      // data = { callId, callerId }
+      try {
+        await Call.findByIdAndUpdate(data.callId, { status: 'rejected' });
+
+        const callerSocketId = userSocketMap.get(data.callerId);
+        if (callerSocketId) {
+          io.to(callerSocketId).emit('call:rejected', {
+            callId: data.callId,
+          });
+        }
+
+        console.log(`❌ Call rejected [${data.callId}]`);
+      } catch (err) {
+        console.error('Call reject error:', err);
+      }
+    });
+
+    // ── Cancel a call (caller cancels before answer) ──
+    socket.on('call:cancel', async (data) => {
+      // data = { callId, calleeId }
+      try {
+        await Call.findByIdAndUpdate(data.callId, { status: 'cancelled' });
+
+        const calleeSocketId = userSocketMap.get(data.calleeId);
+        if (calleeSocketId) {
+          io.to(calleeSocketId).emit('call:cancelled', {
+            callId: data.callId,
+          });
+        }
+
+        console.log(`🚫 Call cancelled [${data.callId}]`);
+      } catch (err) {
+        console.error('Call cancel error:', err);
+      }
+    });
+
+    // ── End a call ──
+    socket.on('call:end', async (data) => {
+      // data = { callId, otherUserId }
+      try {
+        const call = await Call.findById(data.callId);
+        if (call) {
+          const duration = call.startedAt
+            ? Math.floor((Date.now() - new Date(call.startedAt).getTime()) / 1000)
+            : 0;
+
+          call.status = 'ended';
+          call.endedAt = new Date();
+          call.duration = duration;
+          await call.save();
+        }
+
+        const otherSocketId = userSocketMap.get(data.otherUserId);
+        if (otherSocketId) {
+          io.to(otherSocketId).emit('call:ended', {
+            callId: data.callId,
+          });
+        }
+
+        console.log(`📴 Call ended [${data.callId}]`);
+      } catch (err) {
+        console.error('Call end error:', err);
+      }
+    });
+
+    // ── Get online users ──
+    socket.on('users:getOnline', () => {
+      const callerInfo = onlineUsers.get(socket.id);
+      const users = [];
+      onlineUsers.forEach((user) => {
+        // Don't include the requesting user
+        if (user.socketId !== socket.id) {
+          users.push({
+            userId: user.userId,
+            name: user.name,
+            role: user.role,
+          });
+        }
+      });
+      socket.emit('users:online', users);
+    });
+
+    // ── Disconnect ──
+    socket.on('disconnect', () => {
+      const userInfo = onlineUsers.get(socket.id);
+      if (userInfo) {
+        console.log(`💤 ${userInfo.name} (${userInfo.role}) went offline`);
+        userSocketMap.delete(userInfo.userId);
+        onlineUsers.delete(socket.id);
+        broadcastOnlineUsers(io);
+      }
+    });
+  });
+}
+
+function broadcastOnlineUsers(io) {
+  const users = [];
+  onlineUsers.forEach((user) => {
+    users.push({
+      userId: user.userId,
+      name: user.name,
+      role: user.role,
+    });
+  });
+  io.emit('users:online', users);
+}
+
+module.exports = { initializeSocket };

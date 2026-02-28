@@ -25,8 +25,11 @@ export const useTwilioVideo = ({
         setError(null);
 
         try {
+            // Build API URL using current hostname for LAN support
+            const apiBase = import.meta.env.VITE_API_BASE_URL || `http://${window.location.hostname}:5004/api/v1`;
+            
             // Get token from backend
-            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5004/api/v1'}/video/token`, {
+            const response = await axios.post(`${apiBase}/video/token`, {
                 identity,
                 room: roomName
             });

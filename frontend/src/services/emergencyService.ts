@@ -9,7 +9,7 @@ export const mockAlerts: EmergencyAlert[] = [
 
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005/api';
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5004/api`;
 
 export const triggerEmergency = async (elderlyName: string): Promise<any> => {
   try {

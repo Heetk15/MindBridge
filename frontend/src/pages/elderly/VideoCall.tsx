@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Video, Mic, MicOff, VideoOff, Phone, MessageSquare, User, X } from 'lucide-react';
 import { useTwilioVideo } from '../../hooks/useTwilioVideo';
@@ -6,6 +6,8 @@ import Room from '../../components/video/Room';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { cn } from '../../lib/utils';
+import { useCallStore } from '../../store/callStore';
+import { callActions } from '../../hooks/useCallSignaling';
 
 const ElderlyVideoCall = () => {
     const { id } = useParams();
@@ -17,8 +19,12 @@ const ElderlyVideoCall = () => {
     const [message, setMessage] = useState('');
     const [callTime, setCallTime] = useState(0);
 
-    const roomName = `consultation-${id || 'default'}`;
-    const identity = `elderly-${Date.now()}`;
+    const { activeCallId, callStatus } = useCallStore();
+
+    // Room name is passed directly from signaling (e.g. consultation-abc123)
+    const roomName = id || 'default';
+    const identityRef = useRef(`elderly-${Date.now()}`);
+    const identity = identityRef.current;
 
     const {
         room,
@@ -66,8 +72,20 @@ const ElderlyVideoCall = () => {
 
     const handleEndCall = () => {
         disconnectFromRoom();
+        // Notify the other user via socket
+        if (activeCallId) {
+            callActions.endCall(activeCallId, ''); // otherUserId not needed, backend handles it
+        }
         navigate('/elderly/dashboard');
     };
+
+    // Listen for call ended by other side
+    useEffect(() => {
+        if (callStatus === 'ended') {
+            disconnectFromRoom();
+            navigate('/elderly/dashboard');
+        }
+    }, [callStatus]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);

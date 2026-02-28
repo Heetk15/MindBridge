@@ -37,20 +37,18 @@ class VideoController {
       }
 
       try {
-        // Generate access token using Twilio SDK
+        // Generate access token using Twilio SDK v5
         // For Video, we MUST use API Key and Secret, not Account SID and Auth Token
         const AccessToken = twilio.jwt.AccessToken;
         const VideoGrant = AccessToken.VideoGrant;
 
+        // Twilio SDK v5 requires identity in constructor options
         const token = new AccessToken(
           accountSid,
           apiKey,
-          apiSecret
+          apiSecret,
+          { identity, ttl: 3600 }
         );
-
-        // Set token identity
-        token.identity = identity;
-        token.ttl = 3600; // 1 hour
 
         // Add video grant
         token.addGrant(new VideoGrant({ room: room }));
