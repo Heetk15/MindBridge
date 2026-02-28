@@ -12,6 +12,25 @@ const authClient = axios.create({
 
 export const authService = {
   /**
+   * Sign up - Create new user account
+   */
+  signup: async (name: string, email: string, password: string, role: string, phoneNumber?: string) => {
+    try {
+      const response = await authClient.post('/signup', {
+        name,
+        email,
+        password,
+        role,
+        phoneNumber: phoneNumber || undefined,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error signing up:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Send OTP to phone number
    */
   sendOTP: async (phoneNumber: string) => {

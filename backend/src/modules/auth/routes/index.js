@@ -4,6 +4,13 @@ const AuthController = require('../controllers/AuthController');
 const router = express.Router();
 
 /**
+ * POST /signup
+ * Creates a new user account with email/password and optional phone
+ * Body: { name, email, password, role, phoneNumber? }
+ */
+router.post('/signup', AuthController.signup);
+
+/**
  * POST /send-otp
  * Sends an OTP code to the provided phone number
  * Body: { phoneNumber: string (E.164 format) }

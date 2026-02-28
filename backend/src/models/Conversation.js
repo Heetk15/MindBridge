@@ -6,7 +6,12 @@ const conversationSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
+            index: true,
         },
+        title: String,
+        summary: String,
+        emotionalTrend: String,
+        
         messages: [
             {
                 sender: {
@@ -18,23 +23,57 @@ const conversationSchema = new mongoose.Schema(
                     type: String,
                     required: true,
                 },
-                mood: {
+                audioUrl: String,
+                audioPublicId: String,
+                mood: String,
+                sentiment: {
                     type: String,
+                    enum: ['positive', 'neutral', 'negative'],
                 },
+                confidence: Number,
                 timestamp: {
                     type: Date,
                     default: Date.now,
                 },
+                metadata: {
+                    duration: Number,
+                    language: String,
+                },
             },
         ],
+        
         status: {
             type: String,
             enum: ['active', 'archived'],
             default: 'active',
+            index: true,
         },
+        
+        // Analytics
+        messageCount: Number,
+        averageMoodScore: Number,
+        primaryThemes: [String],
+        
+        // Conversation Quality
+        aiModel: String,
+        contextUsed: [String],
+        
+        startedAt: {
+            type: Date,
+            default: Date.now,
+        },
+        endedAt: Date,
+        duration: Number, // in minutes
+        
+        reviewedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
+        notes: String,
     },
     {
         timestamps: true,
+        indexes: [{ userId: 1, startedAt: -1 }, { status: 1 }],
     }
 );
 

@@ -61,6 +61,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/v1/alerts', require('./modules/alerts/routes'))
 app.use('/api/v1/auth', require('./modules/auth/routes'))
+app.use('/api/v1/admin', require('./modules/admin/routes'))
 app.use('/api/chatbot', require('./modules/chatbot/routes'))
 app.use('/api/rag', require('./modules/rag/routes'))
 // app.use('/api/users', require('./modules/users/routes'))

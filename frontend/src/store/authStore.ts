@@ -1,63 +1,70 @@
 import { create } from 'zustand';
+import { authService } from '@/services/authService';
 import type { User, UserRole } from '@/types/user.types';
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  phoneLogin: (phoneNumber: string, token: string, role: UserRole) => void;
-  login: (email: string, password: string, role: UserRole) => void;
-  signup: (name: string, email: string, password: string, role: UserRole) => void;
+  phoneLogin: (phoneNumber: string, token: string, role: UserRole) => Promise<void>;
+  login: (email: string, password: string, role: UserRole) => Promise<void>;
+  signup: (name: string, email: string, password: string, role: UserRole, phoneNumber?: string) => Promise<void>;
   logout: () => void;
 }
 
-const mockUsers: Record<string, User> = {
-  elderly: {
-    id: '1',
-    name: 'Margaret Johnson',
-    email: 'margaret@example.com',
-    phoneNumber: '+919876543210',
-    role: 'elderly',
-    age: 78,
-    emergencyContacts: [
-      { name: 'Sarah Johnson', relationship: 'Daughter', phone: '+1 555-0123' },
-      { name: 'Dr. Robert Smith', relationship: 'Doctor', phone: '+1 555-0456' },
-    ],
-    medicalHistory: ['Type 2 Diabetes', 'Mild Cognitive Impairment', 'Hypertension'],
-    medications: ['Metformin 500mg', 'Donepezil 10mg', 'Lisinopril 20mg'],
-  },
-  caregiver: {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    phoneNumber: '+919876543211',
-    role: 'caregiver',
-  },
-};
-
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: null,
-  isAuthenticated: false,
-  phoneLogin: (phoneNumber, token, role) => {
-    const user: User = {
-      ...mockUsers[role],
-      phoneNumber,
-      id: phoneNumber.replace(/\D/g, ''),
-    };
-    set({ user, token, isAuthenticated: true });
-    // Store in localStorage for persistence
-    localStorage.setItem('authToken', token);
-    localStorage.setItem('user', JSON.stringify(user));
+  token: localStorage.getItem('authToken'),
+  isAuthenticated: !!localStorage.getItem('authToken'),
+
+  phoneLogin: async (phoneNumber, token, role) => {
+    try {
+      const user: User = {
+        id: phoneNumber.replace(/\D/g, ''),
+        phoneNumber,
+        role,
+        name: `User ${phoneNumber.slice(-4)}`,
+      };
+      set({ user, token, isAuthenticated: true });
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify(user));
+    } catch (error) {
+      console.error('Phone login failed:', error);
+      throw error;
+    }
   },
-  login: (_email, _password, role) => {
-    const user = mockUsers[role];
-    set({ user, isAuthenticated: true });
+
+  login: async (_email, _password, role) => {
+    // TODO: Implement email/password login with backend
+    console.log('Email/password login not yet implemented');
   },
-  signup: (name, email, _password, role) => {
-    const user: User = { id: '3', name, email, role };
-    set({ user, isAuthenticated: true });
+
+  signup: async (name, email, password, role, phoneNumber) => {
+    try {
+      const response = await authService.signup(name, email, password, role, phoneNumber);
+      
+      if (response.success && response.data) {
+        const { token, user } = response.data;
+        set({ 
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            phoneNumber: user.phoneNumber,
+          },
+          token,
+          isAuthenticated: true,
+        });
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+    } catch (error) {
+      console.error('Signup failed:', error);
+      throw error;
+    }
   },
+
   logout: () => {
     set({ user: null, token: null, isAuthenticated: false });
     localStorage.removeItem('authToken');
