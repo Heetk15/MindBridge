@@ -11,7 +11,7 @@ const reportSchema = new mongoose.Schema(
         
         generatedFor: {
             type: String,
-            enum: ['elderly', 'caregiver', 'doctor', 'admin'],
+            enum: ['elderly', 'caregiver', 'admin'],
         },
         
         reportType: {

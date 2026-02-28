@@ -62,10 +62,9 @@ app.get('/', (req, res) => {
 app.use('/api/v1/alerts', require('./modules/alerts/routes'))
 app.use('/api/v1/auth', require('./modules/auth/routes'))
 app.use('/api/v1/admin', require('./modules/admin/routes'))
+app.use('/api/v1/video', require('./modules/video/routes'))
 app.use('/api/chatbot', require('./modules/chatbot/routes'))
 app.use('/api/rag', require('./modules/rag/routes'))
-app.use('/api/video', require('./modules/video/routes').default || require('./modules/video/routes'))
-app.use('/api/prescriptions', require('./modules/prescriptions/routes').default || require('./modules/prescriptions/routes'))
 // app.use('/api/users', require('./modules/users/routes'))
 
 // 404 Handler

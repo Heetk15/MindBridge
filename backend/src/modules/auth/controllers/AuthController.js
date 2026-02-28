@@ -20,6 +20,15 @@ class AuthController {
         });
       }
 
+      // Validate role
+      const validRoles = ['elderly', 'caregiver'];
+      if (role && !validRoles.includes(role)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid role. Must be either "elderly" or "caregiver"',
+        });
+      }
+
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -116,6 +125,52 @@ class AuthController {
       });
     }
   }
+  /**
+   * Development/Debug - Get bypass token
+   * @param {Object} req - Express request
+   * @param {Object} res - Express response
+   */
+  static async getDebugToken(req, res) {
+    try {
+      const { role = 'elderly', userId = 'debug_user_123' } = req.query;
+
+      // Generate JWT token
+      const jwtSecret = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+      const token = jwt.sign(
+        {
+          id: userId,
+          phoneNumber: '+919082087674',
+          role: role,
+        },
+        jwtSecret,
+        { expiresIn: '7d' }
+      );
+
+      console.log(`🔓 DEBUG: Token generated for role=${role}, userId=${userId}`);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          token,
+          user: {
+            _id: userId,
+            phoneNumber: '+919082087674',
+            name: `Debug User - ${role}`,
+            role: role,
+            email: `debug_${role}@mindbridge.local`,
+          },
+        },
+        message: 'Debug token generated - for development only',
+      });
+    } catch (error) {
+      console.error('Error in getDebugToken:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to generate debug token',
+      });
+    }
+  }
+
   /**
    * Send OTP to the user's phone number
    * @param {Object} req - Express request object

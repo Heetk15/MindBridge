@@ -10,7 +10,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000
 
 const Login = () => {
   const navigate = useNavigate();
-  const { phoneLogin } = useAuthStore();
+  const { phoneLogin, setDebugUser } = useAuthStore();
   
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -120,6 +120,19 @@ const Login = () => {
 
   const setSuccess = (msg: string) => {
     setSuccessMessage(msg);
+  };
+
+  // Dev bypass — skip auth entirely
+  const handleDevSkip = (skipRole: UserRole) => {
+    const mockUser = {
+      id: `dev_${skipRole}_001`,
+      name: skipRole === 'elderly' ? 'Dev Elderly' : 'Dev Caregiver',
+      email: `dev.${skipRole}@mindbridge.dev`,
+      phoneNumber: '+919999999999',
+      role: skipRole,
+    };
+    setDebugUser(mockUser, `dev-token-${skipRole}-${Date.now()}`);
+    navigate(`/${skipRole}/dashboard`, { replace: true });
   };
 
   return (
@@ -258,6 +271,27 @@ const Login = () => {
         {/* Footer */}
         <div className="mt-12 text-center text-gray-600">
           <p className="text-lg">🔒 Your security is our priority. No passwords needed.</p>
+        </div>
+
+        {/* Dev Bypass — skip login */}
+        <div className="mt-6 border-t-2 border-dashed border-gray-200 pt-6">
+          <p className="text-xs text-gray-400 text-center mb-3 uppercase tracking-wider">Dev Shortcut</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleDevSkip('elderly')}
+              className="flex-1 py-3 text-sm font-semibold rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all"
+            >
+              → Elderly Dashboard
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDevSkip('caregiver')}
+              className="flex-1 py-3 text-sm font-semibold rounded-lg bg-teal-100 text-teal-800 hover:bg-teal-200 transition-all"
+            >
+              → Caregiver Dashboard
+            </button>
+          </div>
         </div>
       </motion.div>
     </div>

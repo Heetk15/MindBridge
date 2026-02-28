@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ['elderly', 'caregiver', 'doctor'],
+            enum: ['elderly', 'caregiver'],
             default: 'elderly',
         },
 
@@ -93,10 +93,7 @@ const userSchema = new mongoose.Schema(
         ],
         caregiverSince: Date,
 
-        // Doctor-specific
-        licenseNumber: String,
-        specialty: String,
-        hospitalAffiliation: String,
+
 
         // Account Settings
         isPhoneVerified: {

@@ -26,7 +26,7 @@ export const useTwilioVideo = ({
 
         try {
             // Get token from backend
-            const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5004/api'}/video/token`, {
+            const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5004/api/v1'}/video/token`, {
                 identity,
                 room: roomName
             });

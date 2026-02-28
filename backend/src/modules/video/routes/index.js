@@ -1,9 +1,13 @@
-import express from 'express';
-import { getVideoToken, validateRoom } from '../controllers/video.controller.js';
+const express = require('express');
+const VideoController = require('../controllers/VideoController');
 
 const router = express.Router();
 
-router.post('/token', getVideoToken);
-router.get('/validate/:room', validateRoom);
+/**
+ * POST /token
+ * Generate Twilio video call access token
+ * Body: { identity: string, room: string }
+ */
+router.post('/token', VideoController.generateToken);
 
-export default router;
+module.exports = router;

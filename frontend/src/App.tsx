@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Landing from './pages/public/Landing';
 import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
+import DebugLogin from './pages/public/DebugLogin';
 import ForgotPassword from './pages/public/ForgotPassword';
 import ElderlyDashboard from './pages/elderly/Dashboard';
 import ElderlyChat from './pages/elderly/Chat';
@@ -24,6 +25,7 @@ const App = () => (
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/debug-login" element={<DebugLogin />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Elderly */}

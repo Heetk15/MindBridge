@@ -2,6 +2,17 @@ import { create } from 'zustand';
 import { authService } from '@/services/authService';
 import type { User, UserRole } from '@/types/user.types';
 
+// Hydrate user from localStorage on startup
+const savedUser = (() => {
+  try {
+    const raw = localStorage.getItem('user');
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+})();
+const savedToken = localStorage.getItem('authToken');
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -9,13 +20,14 @@ interface AuthState {
   phoneLogin: (phoneNumber: string, token: string, role: UserRole) => Promise<void>;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
   signup: (name: string, email: string, password: string, role: UserRole, phoneNumber?: string) => Promise<void>;
+  setDebugUser: (user: User, token: string) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: localStorage.getItem('authToken'),
-  isAuthenticated: !!localStorage.getItem('authToken'),
+  user: savedUser,
+  token: savedToken,
+  isAuthenticated: !!(savedToken && savedUser),
 
   phoneLogin: async (phoneNumber, token, role) => {
     try {
@@ -69,5 +81,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: null, token: null, isAuthenticated: false });
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+  },
+
+  setDebugUser: (user, token) => {
+    set({ user, token, isAuthenticated: true });
+    localStorage.setItem('authToken', token);
+    localStorage.setItem('user', JSON.stringify(user));
   },
 }));

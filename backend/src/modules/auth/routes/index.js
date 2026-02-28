@@ -4,6 +4,13 @@ const AuthController = require('../controllers/AuthController');
 const router = express.Router();
 
 /**
+ * GET /debug-token
+ * Development/Debug - Get bypass token without OTP
+ * Query: ?role=elderly&userId=debug_user (optional)
+ */
+router.get('/debug-token', AuthController.getDebugToken);
+
+/**
  * POST /signup
  * Creates a new user account with email/password and optional phone
  * Body: { name, email, password, role, phoneNumber? }
