@@ -5,11 +5,13 @@ import Login from './pages/public/Login';
 import Signup from './pages/public/Signup';
 import DebugLogin from './pages/public/DebugLogin';
 import ForgotPassword from './pages/public/ForgotPassword';
+import PublicPassport from './pages/public/PublicPassport';
 import ElderlyDashboard from './pages/elderly/Dashboard';
 import ElderlyChat from './pages/elderly/Chat';
 import ElderlyGames from './pages/elderly/Games';
 import ElderlyHealthPassport from './pages/elderly/HealthPassport';
 import ElderlyVideoCall from './pages/elderly/VideoCall';
+import ElderlySupport from './pages/elderly/Support';
 import CaregiverDashboard from './pages/caregiver/Dashboard';
 import CaregiverConversations from './pages/caregiver/Conversations';
 import CaregiverAlerts from './pages/caregiver/Alerts';
@@ -60,6 +62,7 @@ const AppShell = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/debug-login" element={<DebugLogin />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/passport/:id" element={<PublicPassport />} />
 
         {/* Elderly */}
         <Route path="/elderly/dashboard" element={<ProtectedRoute role="elderly"><ElderlyDashboard /></ProtectedRoute>} />
@@ -67,6 +70,7 @@ const AppShell = () => {
         <Route path="/elderly/games" element={<ProtectedRoute role="elderly"><ElderlyGames /></ProtectedRoute>} />
         <Route path="/elderly/health-passport" element={<ProtectedRoute role="elderly"><ElderlyHealthPassport /></ProtectedRoute>} />
         <Route path="/elderly/video-call/:id" element={<ProtectedRoute role="elderly"><ElderlyVideoCall /></ProtectedRoute>} />
+        <Route path="/elderly/support" element={<ProtectedRoute role="elderly"><ElderlySupport /></ProtectedRoute>} />
 
         {/* Caregiver */}
         <Route path="/caregiver/dashboard" element={<ProtectedRoute role="caregiver"><CaregiverDashboard /></ProtectedRoute>} />

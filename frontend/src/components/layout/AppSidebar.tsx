@@ -1,4 +1,4 @@
-import { Brain, LayoutDashboard, MessageCircle, Gamepad2, Activity, Heart, MessageSquare, AlertTriangle, UserCog, MapPin, LogOut, ClipboardList, BarChart3 } from 'lucide-react';
+import { Brain, LayoutDashboard, MessageCircle, Gamepad2, Activity, Heart, MessageSquare, AlertTriangle, UserCog, MapPin, LogOut, ClipboardList, BarChart3, Headphones } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -22,6 +22,7 @@ const elderlyLinks = [
   { to: '/elderly/chat', icon: MessageCircle, label: 'Chat' },
   { to: '/elderly/games', icon: Gamepad2, label: 'Games' },
   { to: '/elderly/health-passport', icon: Heart, label: 'Health' },
+  { to: '/elderly/support', icon: Headphones, label: 'Support' },
 ];
 
 const caregiverLinks = [
