@@ -5,7 +5,7 @@
 
 class QueryExpansionService {
   /**
-   * Synonym mapping for common health/wellness queries
+   * Synonym mapping for common health/wellness/family queries
    */
   static synonymMap = {
     // Nutrition related
@@ -26,10 +26,25 @@ class QueryExpansionService {
     blood: ['blood', 'pressure', 'circulation', 'hypertension'],
     sleep: ['sleep', 'insomnia', 'rest', 'fatigue', 'tired', 'bedroom'],
     heart: ['heart', 'cardiac', 'cardiovascular', 'blood pressure', 'cholesterol'],
+    medicine: ['medicine', 'medication', 'pills', 'prescription', 'drug', 'dose'],
+    medication: ['medication', 'medicine', 'pills', 'prescription', 'drug', 'dose'],
     
-    // Family related
-    family: ['family', 'relatives', 'relationships', 'loved ones', 'grandchildren'],
-    grandchildren: ['grandchildren', 'grandkids', 'kids', 'family'],
+    // Family related — expanded for personal queries
+    son: ['son', 'child', 'family', 'robert', 'children', 'immediate family'],
+    daughter: ['daughter', 'child', 'family', 'susan', 'children', 'immediate family'],
+    family: ['family', 'relatives', 'relationships', 'loved ones', 'grandchildren', 'son', 'daughter', 'children'],
+    grandchildren: ['grandchildren', 'grandkids', 'kids', 'family', 'emma', 'lucas', 'sophia', 'oliver', 'isabella'],
+    grandchild: ['grandchild', 'grandchildren', 'grandkids', 'family'],
+    husband: ['husband', 'spouse', 'partner', 'james', 'married', 'wedding', 'family'],
+    wife: ['wife', 'spouse', 'partner', 'married', 'wedding', 'family'],
+    pet: ['pet', 'dog', 'cat', 'animal', 'buddy', 'whiskers', 'chester', 'parrot'],
+    birthday: ['birthday', 'born', 'date of birth', 'celebration', 'age'],
+    age: ['age', 'years old', 'birthday', 'born', 'date of birth'],
+    live: ['live', 'stay', 'lives', 'city', 'location', 'address', 'home', 'residence'],
+    stay: ['stay', 'live', 'lives', 'city', 'location', 'address', 'home', 'residence'],
+    recipe: ['recipe', 'cook', 'bake', 'food', 'pie', 'cookies', 'kitchen'],
+    hobby: ['hobby', 'hobbies', 'activity', 'interest', 'enjoys', 'pastime', 'leisure'],
+    tradition: ['tradition', 'traditions', 'custom', 'celebrate', 'celebration', 'annual', 'ritual'],
     communication: ['communication', 'talk', 'conversation', 'connect', 'contact'],
     
     // General wellness
@@ -69,11 +84,12 @@ class QueryExpansionService {
    * Extract keywords from query for fallback search
    */
   static extractKeywords(query) {
+    const stopWords = ['that', 'this', 'what', 'when', 'where', 'which', 'help', 'tell', 'give', 'does', 'about', 'with', 'from', 'have', 'been', 'will', 'would', 'could', 'should', 'also', 'just', 'like', 'some', 'they', 'them', 'than', 'then', 'more', 'very', 'much', 'many']
     return query
       .toLowerCase()
       .split(/\s+/)
-      .filter((word) => word.length > 3)
-      .filter((word) => !['that', 'this', 'what', 'when', 'where', 'which', 'help', 'tell', 'give'].includes(word))
+      .filter((word) => word.length >= 2)
+      .filter((word) => !stopWords.includes(word))
   }
 }
 

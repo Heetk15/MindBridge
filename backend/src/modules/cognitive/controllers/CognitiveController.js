@@ -2,14 +2,19 @@
 
 const Conversation = require('../../../models/Conversation')
 const Reminder     = require('../../../models/Reminder')
+const mongoose     = require('mongoose')
+
+// Fallback placeholder userId for anonymous/dev game saves
+const ANON_USER_ID = new mongoose.Types.ObjectId('000000000000000000000001')
 
 /**
  * Cognitive Score Algorithm
  * 
  * Overall score (0-100) = weighted average of:
- *   - Conversation Mood Score  (40%) — based on sentiment of chat messages
- *   - Task Compliance Score    (30%) — based on task completion rate
- *   - Engagement Score         (30%) — based on conversation frequency & length
+ *   - Conversation Mood Score  (35%) — based on sentiment of chat messages
+ *   - Task Compliance Score    (25%) — based on task completion rate
+ *   - Engagement Score         (20%) — based on conversation frequency & length
+ *   - Game Performance Score   (20%) — based on game accuracy & scores
  *
  * Computed from real data in MongoDB.
  */
@@ -77,10 +82,30 @@ class CognitiveController {
           ? new Date(rem.scheduledTime).toISOString().split('T')[0]
           : new Date(rem.createdAt).toISOString().split('T')[0]
         if (!dailyMap[dateKey]) {
-          dailyMap[dateKey] = { moodScores: [], taskTotal: 0, taskDone: 0, msgCount: 0, convCount: 0 }
+          dailyMap[dateKey] = { moodScores: [], taskTotal: 0, taskDone: 0, msgCount: 0, convCount: 0, gameScores: [] }
         }
         dailyMap[dateKey].taskTotal++
         if (rem.isCompleted) dailyMap[dateKey].taskDone++
+      }
+
+      // ── 3. Game performance data ──
+      let gameStats = []
+      try {
+        const GameStats = require('../../../models/GameStats')
+        gameStats = await GameStats.find({ datePlayed: { $gte: since } }).sort({ datePlayed: 1 }).lean()
+      } catch (e) { /* GameStats not available */ }
+
+      for (const gs of gameStats) {
+        const dateKey = new Date(gs.datePlayed).toISOString().split('T')[0]
+        if (!dailyMap[dateKey]) {
+          dailyMap[dateKey] = { moodScores: [], taskTotal: 0, taskDone: 0, msgCount: 0, convCount: 0, gameScores: [] }
+        }
+        if (!dailyMap[dateKey].gameScores) dailyMap[dateKey].gameScores = []
+        // Combine accuracy (0-100) and normalised score — average them
+        const perf = gs.accuracy != null
+          ? (gs.accuracy + Math.min(100, gs.score)) / 2
+          : Math.min(100, gs.score)
+        dailyMap[dateKey].gameScores.push(perf)
       }
 
       // ── Compute daily cognitive scores ──
@@ -107,12 +132,18 @@ class CognitiveController {
         else if (d.msgCount >= 4) engagementScore = 70
         else if (d.msgCount >= 1) engagementScore = 50
 
-        // Weighted combo
-        const overall = Math.round(
-          moodScore * 0.4 +
-          taskScore * 0.3 +
-          engagementScore * 0.3
-        )
+        // Game performance score (0-100) — average of all game sessions that day
+        // If no games played that day, use 50 (neutral) so it doesn't inflate/deflate unfairly
+        const gameScore = d.gameScores && d.gameScores.length > 0
+          ? d.gameScores.reduce((a, b) => a + b, 0) / d.gameScores.length
+          : 50
+
+        const hasGameData = d.gameScores && d.gameScores.length > 0
+
+        // Weighted combo — games included only when data exists, otherwise redistribute weight
+        const overall = hasGameData
+          ? Math.round(moodScore * 0.35 + taskScore * 0.25 + engagementScore * 0.20 + gameScore * 0.20)
+          : Math.round(moodScore * 0.40 + taskScore * 0.30 + engagementScore * 0.30)
 
         dailyScores.push({
           date,
@@ -121,6 +152,8 @@ class CognitiveController {
           moodScore: Math.round(moodScore),
           taskScore: Math.round(taskScore),
           engagementScore: Math.round(engagementScore),
+          gameScore: Math.round(gameScore),
+          gamesPlayed: d.gameScores ? d.gameScores.length : 0,
           messagesCount: d.msgCount,
           conversationsCount: d.convCount,
           tasksCompleted: d.taskDone,
@@ -237,11 +270,18 @@ class CognitiveController {
    */
   async saveGameResult(req, res) {
     try {
-      const { game, score, accuracy, reactionTime, mistakes, completionTime } = req.body
+      // Accept both 'game' and 'gameName' for compatibility
+      const game = req.body.game || req.body.gameName
+      const { score, accuracy, reactionTime, mistakes, completionTime } = req.body
 
       if (!game || score === undefined) {
         return res.status(400).json({ error: 'game and score are required' })
       }
+
+      // Use real userId from JWT if available, otherwise anonymous placeholder
+      const userId = req.auth?.id
+        ? (mongoose.Types.ObjectId.isValid(req.auth.id) ? new mongoose.Types.ObjectId(req.auth.id) : ANON_USER_ID)
+        : ANON_USER_ID
 
       // Map game names to gameName enum
       const gameNameMap = {
@@ -257,7 +297,7 @@ class CognitiveController {
       try {
         const GameStats = require('../../../models/GameStats')
         const stat = new GameStats({
-          userId: new (require('mongoose').Types.ObjectId)('000000000000000000000001'),
+          userId,
           gameName: gameNameMap[game] || 'memory_match',
           score,
           accuracy: accuracy || 0,

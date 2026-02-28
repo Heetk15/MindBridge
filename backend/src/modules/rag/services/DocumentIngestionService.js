@@ -72,19 +72,67 @@ class DocumentIngestionService {
   }
 
   /**
-   * Chunk text into smaller pieces
+   * Chunk text into smaller pieces, respecting paragraph/section boundaries.
+   * Splits on section headers (ALL-CAPS lines, === lines) and double-newlines
+   * first, then falls back to sentence splitting if chunks are too large.
    * @param {string} text - Text to chunk
    * @returns {Array} Array of text chunks
    */
   static chunkText(text) {
-    const chunkSize = chromaConfig.chunkingSettings.chunkSize
-    const overlap = chromaConfig.chunkingSettings.chunkOverlap
-    const chunks = []
+    const maxChunkSize = chromaConfig.chunkingSettings.chunkSize  // 500
+    const overlap = chromaConfig.chunkingSettings.chunkOverlap     // 100
 
-    for (let i = 0; i < text.length; i += chunkSize - overlap) {
-      chunks.push(text.substring(i, i + chunkSize))
+    // Step 1: Split into sections by double-newline or section headers
+    const sectionRegex = /\n\s*\n|\n(?=[A-Z][A-Z\s&\-]{3,}:)/g
+    const rawSections = text.split(sectionRegex).map(s => s.trim()).filter(Boolean)
+
+    // Step 2: Merge small sections together, split large ones
+    const chunks = []
+    let buffer = ''
+
+    for (const section of rawSections) {
+      // If adding this section exceeds max, flush buffer first
+      if (buffer.length > 0 && buffer.length + section.length + 2 > maxChunkSize) {
+        chunks.push(buffer.trim())
+        // Keep overlap from end of buffer
+        buffer = buffer.length > overlap ? buffer.slice(-overlap) : ''
+      }
+
+      // If a single section is larger than max, split it by sentences
+      if (section.length > maxChunkSize) {
+        if (buffer.length > 0) {
+          chunks.push(buffer.trim())
+          buffer = ''
+        }
+        // Split long section by sentences/lines
+        const lines = section.split(/(?<=\.)\s+|\n/)
+        let lineBuffer = ''
+        for (const line of lines) {
+          if (lineBuffer.length + line.length + 1 > maxChunkSize && lineBuffer.length > 0) {
+            chunks.push(lineBuffer.trim())
+            lineBuffer = lineBuffer.length > overlap ? lineBuffer.slice(-overlap) : ''
+          }
+          lineBuffer += (lineBuffer ? '\n' : '') + line
+        }
+        if (lineBuffer.trim()) {
+          buffer = lineBuffer
+        }
+      } else {
+        buffer += (buffer ? '\n\n' : '') + section
+      }
     }
-    
+
+    if (buffer.trim()) {
+      chunks.push(buffer.trim())
+    }
+
+    // Safety: if we ended up with zero chunks, fall back to simple character split
+    if (chunks.length === 0) {
+      for (let i = 0; i < text.length; i += maxChunkSize - overlap) {
+        chunks.push(text.substring(i, i + maxChunkSize))
+      }
+    }
+
     return chunks
   }
 

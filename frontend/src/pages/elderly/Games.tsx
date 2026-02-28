@@ -15,11 +15,15 @@ function submitGameResult(result: {
   console.log("📊 MindBridge Game Result:", result);
   // Also POST to backend for cognitive tracking
   const API = (import.meta as any).env?.VITE_API_URL || `http://${window.location.hostname}:5004/api`;
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || '';
   fetch(`${API}/v1/cognitive/game-result`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({
-      gameName: result.game,
+      game: result.game,
       score: result.score,
       accuracy: result.accuracy,
       reactionTime: result.reactionTime,

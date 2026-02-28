@@ -1,42 +1,57 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  FiSend,
-  FiArrowLeft,
-  FiDatabase,
-  FiVolume2,
-  FiVolumeX,
-  FiGlobe,
-} from 'react-icons/fi'
+  Send,
+  ArrowLeft,
+  Database,
+  Volume2,
+  VolumeX,
+  Globe,
+  Trash2,
+  Sparkles,
+  Heart,
+  Brain,
+  MessageCircle,
+  Bot,
+  Mic,
+  X,
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChatStore } from '../../store/chatStore'
 import ChatMessage from '../../components/Chatbot/ChatMessage'
 import VoiceRecorder from '../../components/Chatbot/VoiceRecorder'
 import KnowledgeBaseModal from '../../components/Chatbot/KnowledgeBaseModal'
 import EmergencyBanner from '../../components/emergency/EmergencyBanner'
-import { triggerEmergency } from '../../services/emergencyService'
+import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api'
 
 const LANGUAGES = [
-  { code: 'auto',       label: 'Auto-detect',  flag: '🌐', ttsLang: '' },
-  { code: 'English',    label: 'English',       flag: '🇬🇧', ttsLang: 'en-US' },
-  { code: 'Hindi',      label: 'हिंदी',          flag: '🇮🇳', ttsLang: 'hi-IN' },
-  { code: 'Tamil',      label: 'தமிழ்',          flag: '🇮🇳', ttsLang: 'ta-IN' },
-  { code: 'Telugu',     label: 'తెలుగు',         flag: '🇮🇳', ttsLang: 'te-IN' },
-  { code: 'Bengali',    label: 'বাংলা',         flag: '🇮🇳', ttsLang: 'bn-IN' },
-  { code: 'Kannada',    label: 'ಕನ್ನಡ',         flag: '🇮🇳', ttsLang: 'kn-IN' },
-  { code: 'Malayalam',  label: 'മലയാളം',       flag: '🇮🇳', ttsLang: 'ml-IN' },
-  { code: 'Marathi',    label: 'मराठी',         flag: '🇮🇳', ttsLang: 'mr-IN' },
-  { code: 'Gujarati',   label: 'ગુજરાતી',       flag: '🇮🇳', ttsLang: 'gu-IN' },
-  { code: 'Spanish',    label: 'Español',       flag: '🇪🇸', ttsLang: 'es-ES' },
-  { code: 'French',     label: 'Français',      flag: '🇫🇷', ttsLang: 'fr-FR' },
-  { code: 'German',     label: 'Deutsch',       flag: '🇩🇪', ttsLang: 'de-DE' },
-  { code: 'Portuguese', label: 'Português',     flag: '🇧🇷', ttsLang: 'pt-BR' },
-  { code: 'Arabic',     label: 'العربية',        flag: '🇸🇦', ttsLang: 'ar-SA' },
-  { code: 'Japanese',   label: '日本語',          flag: '🇯🇵', ttsLang: 'ja-JP' },
-  { code: 'Chinese',    label: '中文',           flag: '🇨🇳', ttsLang: 'zh-CN' },
-  { code: 'Korean',     label: '한국어',          flag: '🇰🇷', ttsLang: 'ko-KR' },
+  { code: 'auto', label: 'Auto-detect', flag: '🌐', ttsLang: '' },
+  { code: 'English', label: 'English', flag: '🇬🇧', ttsLang: 'en-US' },
+  { code: 'Hindi', label: 'हिंदी', flag: '🇮🇳', ttsLang: 'hi-IN' },
+  { code: 'Tamil', label: 'தமிழ்', flag: '🇮🇳', ttsLang: 'ta-IN' },
+  { code: 'Telugu', label: 'తెలుగు', flag: '🇮🇳', ttsLang: 'te-IN' },
+  { code: 'Bengali', label: 'বাংলা', flag: '🇮🇳', ttsLang: 'bn-IN' },
+  { code: 'Kannada', label: 'ಕನ್ನಡ', flag: '🇮🇳', ttsLang: 'kn-IN' },
+  { code: 'Malayalam', label: 'മലയാളം', flag: '🇮🇳', ttsLang: 'ml-IN' },
+  { code: 'Marathi', label: 'मराठी', flag: '🇮🇳', ttsLang: 'mr-IN' },
+  { code: 'Gujarati', label: 'ગુજરાતી', flag: '🇮🇳', ttsLang: 'gu-IN' },
+  { code: 'Spanish', label: 'Español', flag: '🇪🇸', ttsLang: 'es-ES' },
+  { code: 'French', label: 'Français', flag: '🇫🇷', ttsLang: 'fr-FR' },
+  { code: 'German', label: 'Deutsch', flag: '🇩🇪', ttsLang: 'de-DE' },
+  { code: 'Portuguese', label: 'Português', flag: '🇧🇷', ttsLang: 'pt-BR' },
+  { code: 'Arabic', label: 'العربية', flag: '🇸🇦', ttsLang: 'ar-SA' },
+  { code: 'Japanese', label: '日本語', flag: '🇯🇵', ttsLang: 'ja-JP' },
+  { code: 'Chinese', label: '中文', flag: '🇨🇳', ttsLang: 'zh-CN' },
+  { code: 'Korean', label: '한국어', flag: '🇰🇷', ttsLang: 'ko-KR' },
+]
+
+const QUICK_PROMPTS = [
+  { icon: Heart, label: 'How can I sleep better tonight?', color: 'from-rose-500/20 to-pink-500/20 text-rose-600 dark:text-rose-400' },
+  { icon: Brain, label: 'Tell me about my family', color: 'from-violet-500/20 to-purple-500/20 text-violet-600 dark:text-violet-400' },
+  { icon: Sparkles, label: 'What health tips do you have?', color: 'from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-400' },
+  { icon: MessageCircle, label: 'Tell me a nice story', color: 'from-emerald-500/20 to-teal-500/20 text-emerald-600 dark:text-emerald-400' },
 ]
 
 function ChatbotPage() {
@@ -62,8 +77,10 @@ function ChatbotPage() {
   const [showLangMenu, setShowLangMenu] = useState(false)
   const prevIsTypingRef = useRef(false)
   const langMenuRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  // ── Emergency confirmation handlers ─────────────────────────────────────
+  // ── Emergency confirmation ──────────────────────────────────
   const handleEmergencyConfirm = async () => {
     try {
       const userId = conversationId || 'anonymous'
@@ -73,7 +90,6 @@ function ChatbotPage() {
         body: JSON.stringify({ userId, reply: 'yes', userMeta: { name: 'User' } }),
       })
       const data = await res.json()
-      // If success, auto-send the result as an AI message update
       if (data.message) await sendMessage(data.message)
     } catch (err) {
       console.error('Emergency confirm error:', err)
@@ -96,19 +112,14 @@ function ChatbotPage() {
       clearEmergency()
     }
   }
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-scroll to latest message
+  // Auto-scroll
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
+  useEffect(() => { scrollToBottom() }, [messages])
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  // Auto-TTS: speak the last assistant message when LLM finishes responding
+  // Auto-TTS on AI reply
   useEffect(() => {
     if (prevIsTypingRef.current && !isTyping && ttsEnabled && messages.length > 0) {
       const lastMsg = messages[messages.length - 1]
@@ -116,7 +127,6 @@ function ChatbotPage() {
         window.speechSynthesis.cancel()
         const utterance = new SpeechSynthesisUtterance(lastMsg.text)
         utterance.rate = 0.8
-        // Match TTS voice to selected language
         const langEntry = LANGUAGES.find((l) => l.code === language)
         if (langEntry?.ttsLang) {
           utterance.lang = langEntry.ttsLang
@@ -139,7 +149,6 @@ function ChatbotPage() {
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // Handle sending text message
   const handleSendMessage = async (text = inputText) => {
     if (!text.trim()) return
     setInputText('')
@@ -147,173 +156,240 @@ function ChatbotPage() {
     inputRef.current?.focus()
   }
 
-  // Handle voice input
   const handleVoiceTranscript = (transcript: string) => {
     setInputText(transcript)
     setUseVoice(false)
   }
-
-  // Handle voice message sent directly
   const handleVoiceSend = (transcript: string) => {
     handleSendMessage(transcript)
     setUseVoice(false)
   }
-
   const handleVoiceAudio = async (audioBase64: string) => {
     setUseVoice(false)
     await sendVoiceMessage(audioBase64)
   }
 
+  const selectedLang = LANGUAGES.find((l) => l.code === language)
+
   return (
-    <div className="flex h-screen bg-background">
-      {/* Main Chatbot Area */}
-      <div className="flex-1 flex flex-col h-full max-w-5xl mx-auto border-x border-border/50 bg-card/30 backdrop-blur-sm">
-        {/* Header */}
-        <header className="bg-card/50 backdrop-blur-md border-b border-border/50 px-8 py-6 flex items-center justify-between sticky top-0 z-10">
-          <div className="flex items-center gap-4">
+    <AuthenticatedLayout>
+    <div className="flex h-[calc(100vh-3rem)] bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="flex-1 flex flex-col h-full max-w-4xl mx-auto w-full">
+
+        {/* ─── Header ─── */}
+        <motion.header
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="px-4 sm:px-6 py-3 flex items-center justify-between border-b border-border/40 bg-card/60 backdrop-blur-xl sticky top-0 z-20"
+        >
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-secondary rounded-lg transition-all text-foreground hover:text-primary flex items-center justify-center"
+              className="p-2 hover:bg-secondary rounded-xl transition-all text-muted-foreground hover:text-foreground"
               title="Go back"
             >
-              <FiArrowLeft size={24} />
+              <ArrowLeft size={20} />
             </button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground font-display flex items-center gap-2">
-                <span className="w-2 h-8 bg-primary rounded-full" />
-                MindBridge Chat
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                {messages.length} messages in this session
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
+                  <Bot size={20} className="text-primary-foreground" />
+                </div>
+                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-card" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-base font-bold text-foreground leading-tight">MindBridge AI</h1>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Online &bull; Ready to help</p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2">
             {/* Language selector */}
             <div className="relative" ref={langMenuRef}>
               <button
                 onClick={() => setShowLangMenu(!showLangMenu)}
-                className="p-3 hover:bg-secondary rounded-xl transition-all font-medium text-primary flex items-center gap-2"
+                className={`px-3 py-2 rounded-xl transition-all text-sm flex items-center gap-2 ${
+                  showLangMenu ? 'bg-primary/10 text-primary' : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
+                }`}
                 title="Change language"
               >
-                <FiGlobe size={18} />
-                <span className="hidden sm:inline text-sm">
-                  {LANGUAGES.find((l) => l.code === language)?.flag || '🌐'}{' '}
-                  {language === 'auto' ? 'Auto' : language}
+                <Globe size={18} />
+                <span className="text-xs font-semibold">
+                  {selectedLang?.flag} {language === 'auto' ? 'Language' : language}
                 </span>
               </button>
-              {showLangMenu && (
-                <div className="absolute right-0 top-full mt-1 w-56 max-h-72 overflow-y-auto bg-card border border-border rounded-xl shadow-xl z-50 scrollbar-thin">
-                  {LANGUAGES.map((l) => (
-                    <button
-                      key={l.code}
-                      onClick={() => { setLanguage(l.code); setShowLangMenu(false) }}
-                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-secondary transition-colors ${
-                        language === l.code ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground'
-                      }`}
-                    >
-                      <span>{l.flag}</span>
-                      <span>{l.label}</span>
-                      {l.code !== 'auto' && l.label !== l.code && (
-                        <span className="text-xs text-muted-foreground ml-auto">{l.code}</span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <AnimatePresence>
+                {showLangMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 w-52 max-h-64 overflow-y-auto bg-card border border-border/60 rounded-2xl shadow-2xl z-50 py-1"
+                  >
+                    {LANGUAGES.map((l) => (
+                      <button
+                        key={l.code}
+                        onClick={() => { setLanguage(l.code); setShowLangMenu(false) }}
+                        className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2.5 hover:bg-secondary/80 transition-colors ${
+                          language === l.code ? 'bg-primary/10 text-primary font-semibold' : 'text-foreground'
+                        }`}
+                      >
+                        <span className="text-base">{l.flag}</span>
+                        <span className="text-xs">{l.label}</span>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+
+            {/* TTS toggle */}
             <button
               onClick={() => {
                 const next = !ttsEnabled
                 setTtsEnabled(next)
                 if (!next) window.speechSynthesis.cancel()
               }}
-              className={`p-3 rounded-xl transition-all font-medium flex items-center gap-2 ${
+              className={`px-3 py-2 rounded-xl transition-all flex items-center gap-2 ${
                 ttsEnabled
-                  ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                  : 'hover:bg-secondary text-muted-foreground'
+                  ? 'bg-primary/10 text-primary'
+                  : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
               }`}
-              title={ttsEnabled ? 'Disable speech' : 'Enable speech'}
+              title={ttsEnabled ? 'Disable auto-speech' : 'Enable auto-speech'}
             >
-              {ttsEnabled ? <FiVolume2 size={18} /> : <FiVolumeX size={18} />}
-              <span className="hidden sm:inline text-sm">{ttsEnabled ? 'Speech On' : 'Speech Off'}</span>
+              {ttsEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              <span className="text-xs font-semibold hidden sm:inline">{ttsEnabled ? 'Read Aloud' : 'Muted'}</span>
             </button>
+
+            {/* Knowledge Base */}
             <button
               onClick={() => setShowKBModal(true)}
-              className="p-3 hover:bg-secondary rounded-xl transition-all font-medium text-primary flex items-center gap-2"
-              title="Add to Knowledge Base"
+              className="px-3 py-2 rounded-xl hover:bg-secondary transition-all text-muted-foreground hover:text-foreground flex items-center gap-2"
+              title="Knowledge Base"
             >
-              <FiDatabase size={18} />
-              <span className="hidden sm:inline text-sm">Add Knowledge</span>
+              <Database size={18} />
+              <span className="text-xs font-semibold hidden sm:inline">My Info</span>
             </button>
+
+            {/* Clear chat */}
             {messages.length > 0 && (
               <button
                 onClick={clearMessages}
-                className="p-3 hover:bg-secondary rounded-xl transition-all font-medium text-destructive flex items-center gap-2"
+                className="px-3 py-2 rounded-xl hover:bg-destructive/10 transition-all text-muted-foreground hover:text-destructive flex items-center gap-2"
                 title="Clear conversation"
               >
-                <span className="text-lg">🗑</span>
-                <span className="hidden sm:inline">Clear</span>
+                <Trash2 size={18} />
+                <span className="text-xs font-semibold hidden sm:inline">Clear</span>
               </button>
             )}
           </div>
-        </header>
+        </motion.header>
 
-        {/* Emergency Banner */}
+        {/* ─── Emergency Banner ─── */}
         <AnimatePresence>
           {emergency?.detected && (
-            <div className="px-8 pt-4">
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="px-4 pt-3"
+            >
               <EmergencyBanner
                 emergency={emergency}
                 onDismiss={clearEmergency}
                 onConfirm={handleEmergencyConfirm}
                 onCancel={handleEmergencyCancel}
               />
-            </div>
+            </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-6 scrollbar-thin scrollbar-thumb-primary/10 hover:scrollbar-thumb-primary/20 transition-all">
+        {/* ─── Messages Area ─── */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6 space-y-1 scrollbar-thin scrollbar-thumb-border/50 hover:scrollbar-thumb-border transition-all">
           <AnimatePresence mode="popLayout">
             {messages.length === 0 ? (
+              /* ─── Welcome Screen ─── */
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto"
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="flex flex-col items-center justify-center h-full text-center px-4"
               >
-                <div className="w-24 h-24 bg-primary/10 rounded-3xl flex items-center justify-center text-5xl mb-8 animate-float">
-                  💬
-                </div>
-                <h2 className="text-3xl font-bold text-foreground mb-4 font-display">
-                  Welcome to MindBridge
-                </h2>
-                <p className="text-muted-foreground mb-12 text-lg">
-                  I'm your AI companion, specialized in health and daily guidance for senior citizens.
-                  How can I help you today?
-                </p>
+                {/* Avatar */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                  className="relative mb-6"
+                >
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary via-primary/80 to-violet-500 flex items-center justify-center shadow-2xl shadow-primary/30">
+                    <Bot size={36} className="text-primary-foreground" />
+                  </div>
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-[3px] border-background flex items-center justify-center"
+                  >
+                    <span className="w-2 h-2 bg-white rounded-full" />
+                  </motion.div>
+                </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                  {[
-                    "How can I improve my sleep tonight?",
-                    "What health tips do you have for me?",
-                    "Tell me a story about a happy memory.",
-                    "How are you feeling today?"
-                  ].map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => handleSendMessage(suggestion)}
-                      className="p-5 bg-card border border-border/50 rounded-2xl hover:border-primary/50 hover:bg-primary/5 transition-all text-left text-sm font-medium group flex items-center justify-between"
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                    Hello! I'm here for you
+                  </h2>
+                  <p className="text-muted-foreground text-sm sm:text-base max-w-md mx-auto mb-8 leading-relaxed">
+                    Your personal AI companion. Ask me about your health, family, daily routines, or just have a friendly chat.
+                  </p>
+                </motion.div>
+
+                {/* Quick prompts */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
+                  {QUICK_PROMPTS.map((prompt, i) => (
+                    <motion.button
+                      key={prompt.label}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + i * 0.1 }}
+                      onClick={() => handleSendMessage(prompt.label)}
+                      className={`group flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r ${prompt.color} border border-border/30 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 text-left active:scale-[0.98]`}
                     >
-                      <span className="text-foreground/80 group-hover:text-primary transition-colors">{suggestion}</span>
-                      <span className="text-primary opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">→</span>
-                    </button>
+                      <div className="p-2 rounded-xl bg-white/60 dark:bg-white/10 group-hover:scale-110 transition-transform">
+                        <prompt.icon size={18} />
+                      </div>
+                      <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors leading-snug">
+                        {prompt.label}
+                      </span>
+                    </motion.button>
                   ))}
                 </div>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.9 }}
+                  className="text-xs text-muted-foreground/50 mt-8 flex items-center gap-1.5"
+                >
+                  <Sparkles size={12} />
+                  Powered by MindBridge RAG & AI
+                </motion.p>
               </motion.div>
             ) : (
-              messages.map((msg) => (
-                <motion.div key={msg.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              /* ─── Message list ─── */
+              messages.map((msg, index) => (
+                <motion.div
+                  key={msg.id}
+                  layout
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: index > messages.length - 3 ? 0.05 : 0 }}
+                >
                   <ChatMessage
                     message={msg}
                     ttsEnabled={ttsEnabled}
@@ -324,88 +400,129 @@ function ChatbotPage() {
                 </motion.div>
               ))
             )}
+
+            {/* Typing indicator */}
             {isTyping && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-3 px-2"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="flex items-end gap-2.5 pl-1"
               >
-                <div className="w-10 h-10 bg-primary/10 rounded-xl animate-pulse flex items-center justify-center text-primary text-xs font-bold">AI</div>
-                <div className="flex gap-1.5 p-4 bg-secondary rounded-2xl rounded-bl-none">
-                  <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                  <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                  <span className="w-2 h-2 bg-primary/40 rounded-full animate-bounce" />
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-md shadow-primary/10">
+                  <Bot size={14} className="text-primary-foreground" />
                 </div>
+                <div className="bg-secondary/80 backdrop-blur-sm rounded-2xl rounded-bl-md px-4 py-3 border border-border/30">
+                  <div className="flex items-center gap-1.5">
+                    <motion.span
+                      animate={{ y: [0, -4, 0] }}
+                      transition={{ repeat: Infinity, duration: 0.6, delay: 0 }}
+                      className="w-2 h-2 bg-primary/50 rounded-full"
+                    />
+                    <motion.span
+                      animate={{ y: [0, -4, 0] }}
+                      transition={{ repeat: Infinity, duration: 0.6, delay: 0.15 }}
+                      className="w-2 h-2 bg-primary/50 rounded-full"
+                    />
+                    <motion.span
+                      animate={{ y: [0, -4, 0] }}
+                      transition={{ repeat: Infinity, duration: 0.6, delay: 0.3 }}
+                      className="w-2 h-2 bg-primary/50 rounded-full"
+                    />
+                  </div>
+                </div>
+                <span className="text-[10px] text-muted-foreground/60 mb-1">Thinking...</span>
               </motion.div>
             )}
           </AnimatePresence>
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Error Message */}
+        {/* ─── Error ─── */}
         <AnimatePresence>
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              className="mx-8 mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-2xl flex items-center justify-between"
+              exit={{ opacity: 0, y: 10 }}
+              className="mx-4 mb-2 p-3 bg-destructive/10 border border-destructive/20 rounded-xl flex items-center justify-between"
             >
-              <p className="text-sm font-medium text-destructive">{error}</p>
+              <p className="text-xs font-medium text-destructive">{error}</p>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Input Area */}
-        <div className="p-8 pt-2">
-          <div className="glass-card-elevated p-3 relative overflow-hidden group/input border-border/40">
-            {useVoice ? (
+        {/* ─── Input Area ─── */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="p-3 sm:p-4 border-t border-border/40 bg-card/60 backdrop-blur-xl"
+        >
+          {useVoice ? (
+            <div className="relative">
               <VoiceRecorder
                 onTranscript={handleVoiceTranscript}
                 onAudioData={handleVoiceAudio}
                 onSendMessage={handleVoiceSend}
                 disabled={isTyping}
               />
-            ) : (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setUseVoice(true)}
-                  className="p-4 bg-destructive text-destructive-foreground rounded-xl hover:opacity-90 transition-all font-semibold flex items-center justify-center shadow-lg hover:shadow-destructive/20 active:scale-95 disabled:opacity-50"
-                  disabled={isTyping}
-                  title="Speak message"
-                >
-                  <span className="text-xl">🎤</span>
-                </button>
+              <button
+                onClick={() => setUseVoice(false)}
+                className="absolute top-2 right-2 p-1.5 rounded-lg bg-secondary hover:bg-destructive/10 hover:text-destructive transition-all"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-end gap-2">
+              {/* Voice button */}
+              <button
+                onClick={() => setUseVoice(true)}
+                disabled={isTyping}
+                className="shrink-0 px-4 py-3 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/20 hover:shadow-rose-500/30 hover:scale-105 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 flex items-center gap-2"
+                title="Voice input"
+              >
+                <Mic size={22} />
+                <span className="text-sm font-semibold hidden sm:inline">Voice</span>
+              </button>
+
+              {/* Text input */}
+              <div className="flex-1 flex items-end bg-secondary/50 rounded-2xl border border-border/40 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
                 <input
                   ref={inputRef}
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Ask me anything..."
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  placeholder="Type your message..."
                   disabled={isTyping}
-                  className="flex-1 px-5 py-4 bg-transparent rounded-xl focus:outline-none text-foreground placeholder:text-muted-foreground/60 text-lg disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-transparent focus:outline-none text-foreground placeholder:text-muted-foreground/50 text-base disabled:opacity-50 min-w-0"
                 />
-                <button
-                  onClick={() => handleSendMessage()}
-                  disabled={!inputText.trim() || isTyping}
-                  className="px-8 py-4 gradient-primary text-primary-foreground rounded-xl hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:grayscale disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed font-bold flex items-center gap-3 shadow-lg hover:shadow-primary/30"
-                >
-                  <FiSend size={20} className={inputText.trim() ? "animate-bounce" : ""} />
-                  <span>Send</span>
-                </button>
               </div>
-            )}
-          </div>
-          <p className="text-center text-[10px] text-muted-foreground mt-3 uppercase tracking-widest font-bold opacity-40">
-            Powered by MindBridge RAG & AI
-          </p>
-        </div>
+
+              {/* Send button */}
+              <button
+                onClick={() => handleSendMessage()}
+                disabled={!inputText.trim() || isTyping}
+                className={`shrink-0 px-4 py-3 rounded-2xl transition-all duration-200 shadow-lg active:scale-95 disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed disabled:shadow-none flex items-center gap-2 ${
+                  inputText.trim()
+                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-primary/20 hover:shadow-primary/30 hover:scale-105'
+                    : 'bg-secondary text-muted-foreground shadow-none'
+                }`}
+              >
+                <Send size={22} />
+                <span className="text-sm font-semibold hidden sm:inline">Send</span>
+              </button>
+            </div>
+          )}
+        </motion.div>
       </div>
 
       {/* Knowledge Base Modal */}
       <KnowledgeBaseModal isOpen={showKBModal} onClose={() => setShowKBModal(false)} />
     </div>
+    </AuthenticatedLayout>
   )
 }
 

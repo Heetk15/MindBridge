@@ -43,7 +43,7 @@ class SimpleVectorStore {
   }
 
   /**
-   * Generate embedding for text
+   * Generate embedding for text using proper mean pooling
    */
   static async getEmbedding(text) {
     if (!model || !tokenizer) {
@@ -64,12 +64,34 @@ class SimpleVectorStore {
       })
 
       // Generate embeddings
-      const { last_hidden_state } = await model(tokens)
+      const output = await model(tokens)
+      const lastHidden = output.last_hidden_state
+      const dims = lastHidden.dims              // [1, seqLen, 384]
+      const seqLen = dims[1]
+      const hiddenSize = dims[2]                // 384
+      const attentionMask = tokens.attention_mask
 
-      // Mean pooling to get sentence embedding
-      const embedding = Array.from(last_hidden_state.data).slice(0, 384) // 384-dim embedding
+      // Mean pooling: average all non-padding token embeddings
+      const pooled = new Float64Array(hiddenSize)
+      let tokenCount = 0
+      for (let t = 0; t < seqLen; t++) {
+        // attention_mask can be BigInt (1n) or Number (1)
+        const maskVal = Number(attentionMask.data[t])
+        if (maskVal === 1) {
+          for (let j = 0; j < hiddenSize; j++) {
+            pooled[j] += lastHidden.data[t * hiddenSize + j]
+          }
+          tokenCount++
+        }
+      }
+      if (tokenCount > 0) {
+        for (let j = 0; j < hiddenSize; j++) {
+          pooled[j] /= tokenCount
+        }
+      }
 
-      // Normalize embedding
+      // L2-normalize
+      const embedding = Array.from(pooled)
       const norm = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0))
       const normalized = embedding.map(val => val / (norm || 1))
 
@@ -78,7 +100,7 @@ class SimpleVectorStore {
       
       // Debug log first embedding
       if (Object.keys(embeddingCache).length === 1) {
-        console.log(`[EMBEDDING DEBUG] First embedding for "${text.substring(0, 30)}...": norm=${norm.toFixed(4)}, dims=${normalized.length}`)
+        console.log(`[EMBEDDING DEBUG] First embedding for "${text.substring(0, 30)}...": norm=${norm.toFixed(4)}, dims=${normalized.length}, tokens=${tokenCount}`)
         console.log(`  First 5 values: [${normalized.slice(0, 5).map(v => v.toFixed(4)).join(', ')}]`)
       }
 
@@ -235,25 +257,33 @@ class SimpleVectorStore {
       const contentLower = doc.content.toLowerCase()
       let score = 0
 
-      // Count keyword matches in content
+      // Count keyword matches using word boundaries (whole-word match)
       let matches = 0
       for (const word of queryWords) {
-        if (contentLower.includes(word)) {
+        // Use word boundary regex to avoid "child" matching "grandchildren"
+        const wordRegex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+        if (wordRegex.test(contentLower)) {
           matches++
           // Boost score if word is near start of content
-          if (contentLower.indexOf(word) < 500) {
-            score += 0.3
+          const idx = contentLower.search(wordRegex)
+          if (idx >= 0 && idx < 300) {
+            score += 0.15
           } else {
-            score += 0.2
+            score += 0.1
           }
         }
+      }
+
+      // Proportion of query words matched (rewards covering more of the query)
+      if (queryWords.length > 0) {
+        score *= (matches / queryWords.length)
       }
 
       // Tag matching
       if (doc.metadata?.tags) {
         for (const tag of doc.metadata.tags) {
           if (queryWords.some(w => tag.toLowerCase().includes(w))) {
-            score += 0.15
+            score += 0.1
           }
         }
       }
@@ -262,19 +292,18 @@ class SimpleVectorStore {
       if (doc.metadata?.category && queryWords.some(w => 
         doc.metadata.category.toLowerCase().includes(w)
       )) {
-        score += 0.15
+        score += 0.1
       }
 
+      const clampedScore = Math.min(0.8, score) // Keyword-only can never be 1.0
       return {
         ...doc,
-        keywordScore: Math.min(1, score),
-        similarity: Math.min(1, score),
-        distance: 1 - Math.min(1, score),
+        keywordScore: clampedScore,
       }
     })
 
     return scored
-      .filter(r => r.keywordScore > 0.1)
+      .filter(r => r.keywordScore > 0.05)
       .sort((a, b) => b.keywordScore - a.keywordScore)
       .slice(0, nResults)
   }
@@ -320,27 +349,37 @@ class SimpleVectorStore {
     // Keyword search fallback
     const keywordResults = await this.keywordSearch(query, nResults * 2)
 
-    // Merge results by ID, preferring hybrid scores
+    // Merge results by ID, combining semantic + keyword scores
     const resultMap = new Map()
 
-    // Add semantic results
+    // Add semantic results (store semantic similarity separately)
     semanticResults.forEach(doc => {
       resultMap.set(doc.id, {
-        ...doc,
-        score: doc.similarity * 0.6, // Weight semantic search
+        id: doc.id,
+        content: doc.content,
+        metadata: doc.metadata,
+        semanticSim: doc.similarity,
+        keywordScore: 0,
+        score: doc.similarity * 0.7, // Semantic weight
       })
     })
 
     // Add/enhance with keyword results
     keywordResults.forEach(doc => {
       if (resultMap.has(doc.id)) {
-        // Combine scores
+        // Combine scores: add keyword component
         const existing = resultMap.get(doc.id)
-        existing.score = Math.max(existing.score, doc.keywordScore * 0.4) + (doc.keywordScore * 0.4)
+        existing.keywordScore = doc.keywordScore
+        existing.score = (existing.semanticSim * 0.7) + (doc.keywordScore * 0.3)
       } else {
+        // Keyword-only result (no semantic match)
         resultMap.set(doc.id, {
-          ...doc,
-          score: doc.keywordScore * 0.4, // Weight keyword search
+          id: doc.id,
+          content: doc.content,
+          metadata: doc.metadata,
+          semanticSim: 0,
+          keywordScore: doc.keywordScore,
+          score: doc.keywordScore * 0.3, // Keyword-only weight
         })
       }
     })
@@ -350,10 +389,15 @@ class SimpleVectorStore {
       .sort((a, b) => b.score - a.score)
       .slice(0, nResults)
 
+    console.log(`[HYBRID DEBUG] Final top ${results.length} results:`)
+    results.forEach((r, i) => {
+      console.log(`  ${i+1}. "${r.metadata?.source}" chunk=${r.metadata?.chunk_index} | sem=${r.semanticSim.toFixed(3)} kw=${r.keywordScore.toFixed(3)} combined=${r.score.toFixed(3)}`)
+    })
+
     return {
       ids: [results.map((r) => r.id)],
       documents: [results.map((r) => r.content)],
-      distances: [results.map((r) => r.distance)],
+      distances: [results.map((r) => 1 - r.score)], // Distance = 1 - combined score
       metadatas: [results.map((r) => r.metadata)],
     }
   }
