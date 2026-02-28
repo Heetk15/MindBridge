@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import { motion, AnimatePresence } from "framer-motion";
 import * as Icons from "lucide-react";
 
-// ─── Mock Analytics Logger ────────────────────────────────────────
+// ─── Game Analytics Logger (sends to backend) ────────────────────
 function submitGameResult(result: {
   game: string;
   score: number;
@@ -13,6 +13,20 @@ function submitGameResult(result: {
   completionTime: number;
 }) {
   console.log("📊 MindBridge Game Result:", result);
+  // Also POST to backend for cognitive tracking
+  const API = (import.meta as any).env?.VITE_API_URL || `http://${window.location.hostname}:5004/api`;
+  fetch(`${API}/v1/cognitive/game-result`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      gameName: result.game,
+      score: result.score,
+      accuracy: result.accuracy,
+      reactionTime: result.reactionTime,
+      mistakes: result.mistakes,
+      completionTime: result.completionTime,
+    }),
+  }).catch(err => console.warn('Failed to save game result to backend:', err));
 }
 
 // ─── Types ────────────────────────────────────────────────────────

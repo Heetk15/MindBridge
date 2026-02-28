@@ -6,6 +6,7 @@ const app = require('./app')
 const initializeRAGModule = require('./modules/rag/init')
 const { connectDB } = require('./config/database')
 const { initializeSocket } = require('./socket/callSignaling')
+const TaskScheduler = require('./services/TaskScheduler')
 
 const PORT = process.env.PORT || 5004
 let server = null
@@ -42,6 +43,9 @@ const startServer = async () => {
 
     // Make io accessible from routes if needed
     app.set('io', io)
+
+    // Start task overdue scheduler
+    TaskScheduler.start()
 
     // Start server on all interfaces (0.0.0.0) for LAN access
     server.listen(PORT, '0.0.0.0', () => {
