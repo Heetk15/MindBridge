@@ -1,4 +1,4 @@
-import { Brain, LayoutDashboard, MessageCircle, Gamepad2, Activity, Heart, MessageSquare, AlertTriangle, UserCog, LogOut } from 'lucide-react';
+import { Brain, LayoutDashboard, MessageCircle, Gamepad2, Activity, Heart, MessageSquare, AlertTriangle, UserCog, MapPin, LogOut } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -29,6 +29,7 @@ const caregiverLinks = [
   { to: '/caregiver/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/caregiver/conversations', icon: MessageSquare, label: 'Conversations' },
   { to: '/caregiver/alerts', icon: AlertTriangle, label: 'Alerts' },
+  { to: '/caregiver/location', icon: MapPin, label: 'Location Monitor' },
   { to: '/caregiver/manage-profile', icon: UserCog, label: 'Profile' },
 ];
 

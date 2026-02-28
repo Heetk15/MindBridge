@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import { Gamepad2, MessageCircle, Activity, Heart, Video } from 'lucide-react';
 import AuthenticatedLayout from '@/components/layout/AuthenticatedLayout';
 import OnlineUsersCard from '@/components/video/OnlineUsersCard';
+import LocationTracker from '@/components/tracking/LocationTracker';
+import { useAuthStore } from '@/store/authStore';
 
 const quickLinks = [
   { to: '/elderly/chat', icon: MessageCircle, label: 'Chat', color: 'bg-primary/10 text-primary' },
@@ -19,9 +21,12 @@ const quickLinks = [
 
 const ElderlyDashboard = () => {
   const { currentScore } = useCognitiveStore();
+  const { user } = useAuthStore();
 
   return (
     <AuthenticatedLayout>
+      {/* Silent background GPS tracking — sends coords to backend */}
+      <LocationTracker userId={String(user?.id || '1')} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-3xl font-display font-bold text-foreground mb-8">
           Good Morning, Margaret 🌞

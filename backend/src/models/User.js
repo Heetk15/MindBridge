@@ -93,7 +93,23 @@ const userSchema = new mongoose.Schema(
         ],
         caregiverSince: Date,
 
-
+        // Location Tracking (for elderly users)
+        currentLocation: {
+            latitude: { type: Number },
+            longitude: { type: Number },
+        },
+        homeLocation: {
+            latitude: { type: Number },
+            longitude: { type: Number },
+        },
+        safeRadiusInMeters: {
+            type: Number,
+            default: 200,
+        },
+        alertActive: {
+            type: Boolean,
+            default: false,
+        },
 
         // Account Settings
         isPhoneVerified: {

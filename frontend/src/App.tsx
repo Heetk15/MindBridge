@@ -15,11 +15,13 @@ import CaregiverDashboard from './pages/caregiver/Dashboard';
 import CaregiverConversations from './pages/caregiver/Conversations';
 import CaregiverAlerts from './pages/caregiver/Alerts';
 import CaregiverManageProfile from './pages/caregiver/ManageProfile';
+import CaregiverLocationMonitor from './pages/caregiver/LocationMonitor';
 import CaregiverVideoCall from './pages/caregiver/VideoCall';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import IncomingCallModal from './components/video/IncomingCallModal';
 import OutgoingCallModal from './components/video/OutgoingCallModal';
+import GeofenceAlertBanner from './components/emergency/GeofenceAlertBanner';
 import { useCallSignaling } from './hooks/useCallSignaling';
 import { useCallStore } from './store/callStore';
 import { useAuthStore } from './store/authStore';
@@ -47,6 +49,8 @@ const AppShell = () => {
       {/* Global call modals — shown on any page */}
       <IncomingCallModal />
       <OutgoingCallModal />
+      {/* Geofence breach alerts — floating cards for caregivers */}
+      <GeofenceAlertBanner />
 
       <Routes>
         {/* Public */}
@@ -68,6 +72,7 @@ const AppShell = () => {
         <Route path="/caregiver/dashboard" element={<ProtectedRoute role="caregiver"><CaregiverDashboard /></ProtectedRoute>} />
         <Route path="/caregiver/conversations" element={<ProtectedRoute role="caregiver"><CaregiverConversations /></ProtectedRoute>} />
         <Route path="/caregiver/alerts" element={<ProtectedRoute role="caregiver"><CaregiverAlerts /></ProtectedRoute>} />
+        <Route path="/caregiver/location" element={<ProtectedRoute role="caregiver"><CaregiverLocationMonitor /></ProtectedRoute>} />
         <Route path="/caregiver/manage-profile" element={<ProtectedRoute role="caregiver"><CaregiverManageProfile /></ProtectedRoute>} />
         <Route path="/caregiver/video-call/:id" element={<ProtectedRoute role="caregiver"><CaregiverVideoCall /></ProtectedRoute>} />
 

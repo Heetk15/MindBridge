@@ -66,14 +66,21 @@ app.get('/', (req, res) => {
   })
 })
 
-// API Routes
+// ================= API ROUTES =================
+
+// Existing Routes
 app.use('/api/v1/alerts', require('./modules/alerts/routes'))
 app.use('/api/v1/auth', require('./modules/auth/routes'))
 app.use('/api/v1/admin', require('./modules/admin/routes'))
 app.use('/api/v1/video', require('./modules/video/routes'))
+// app.use('/api/v1/prescriptions', require('./modules/prescriptions/routes'))  // ES module – needs conversion
 app.use('/api/chatbot', require('./modules/chatbot/routes'))
 app.use('/api/rag', require('./modules/rag/routes'))
-// app.use('/api/users', require('./modules/users/routes'))
+
+// Location tracking (GPS)
+app.use('/api/location', require('./modules/location/routes'))
+
+// ==============================================
 
 // 404 Handler
 app.use((req, res) => {

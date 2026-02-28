@@ -201,6 +201,32 @@ function initializeSocket(io) {
       }
     });
 
+    // ── Geofence alert acknowledge / ignore ──
+    socket.on('geofence:acknowledge', (data) => {
+      // data = { alertId, userId (patient), caregiverId }
+      console.log(`✅ Geofence alert acknowledged by caregiver [${data.caregiverId}] for patient [${data.userId}]`);
+      // Broadcast to all connected clients so other caregivers see it was handled
+      io.emit('geofence:resolved', {
+        alertId: data.alertId,
+        userId: data.userId,
+        resolvedBy: data.caregiverId,
+        action: 'acknowledged',
+        timestamp: new Date().toISOString(),
+      });
+    });
+
+    socket.on('geofence:ignore', (data) => {
+      // data = { alertId, userId (patient), caregiverId }
+      console.log(`🔕 Geofence alert ignored by caregiver [${data.caregiverId}] for patient [${data.userId}]`);
+      io.emit('geofence:resolved', {
+        alertId: data.alertId,
+        userId: data.userId,
+        resolvedBy: data.caregiverId,
+        action: 'ignored',
+        timestamp: new Date().toISOString(),
+      });
+    });
+
     // ── Get online users ──
     socket.on('users:getOnline', () => {
       const seen = new Set();
@@ -248,4 +274,43 @@ function broadcastOnlineUsers(io) {
   io.emit('users:online', users);
 }
 
-module.exports = { initializeSocket };
+/**
+ * Emit a geofence breach alert to all online caregivers via Socket.io.
+ *
+ * @param {import('socket.io').Server} io - The Socket.io server instance
+ * @param {Object} alertData
+ * @param {string} alertData.alertId      - Unique alert identifier
+ * @param {string} alertData.userId       - The patient's user ID
+ * @param {string} alertData.patientName  - Patient display name
+ * @param {number} alertData.distance     - Distance from home in metres
+ * @param {number} alertData.safeRadius   - Configured safe radius in metres
+ * @param {number} alertData.latitude     - Current latitude
+ * @param {number} alertData.longitude    - Current longitude
+ */
+function emitGeofenceAlert(io, alertData) {
+  if (!io) return;
+
+  // Find all online caregivers and emit to them specifically
+  const caregiverSockets = [];
+  onlineUsers.forEach((user) => {
+    if (user.role === 'caregiver') {
+      caregiverSockets.push(user.socketId);
+    }
+  });
+
+  const payload = {
+    ...alertData,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (caregiverSockets.length > 0) {
+    caregiverSockets.forEach((sid) => {
+      io.to(sid).emit('geofence:alert', payload);
+    });
+    console.log(`🚨 Geofence alert emitted to ${caregiverSockets.length} caregiver(s) for patient [${alertData.patientName}]`);
+  } else {
+    console.log(`🚨 Geofence alert for [${alertData.patientName}] — no caregivers online`);
+  }
+}
+
+module.exports = { initializeSocket, emitGeofenceAlert };

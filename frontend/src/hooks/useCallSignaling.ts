@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { getSocket } from '@/services/socketService';
 import { useCallStore } from '@/store/callStore';
 import { useAuthStore } from '@/store/authStore';
+import { useGeofenceAlertStore } from '@/store/geofenceAlertStore';
 
 // ── Standalone action functions (safe to call from any component) ──
 
@@ -161,6 +162,26 @@ export const useCallSignaling = () => {
       });
     };
 
+    // ── Geofence alert handlers ──
+    const onGeofenceAlert = (data: any) => {
+      console.log('🚨 Geofence breach alert:', data.patientName, data.distance, 'm');
+      useGeofenceAlertStore.getState().addAlert({
+        alertId: data.alertId,
+        userId: data.userId,
+        patientName: data.patientName,
+        distance: data.distance,
+        safeRadius: data.safeRadius,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        timestamp: data.timestamp,
+      });
+    };
+
+    const onGeofenceResolved = (data: any) => {
+      console.log(`✅ Geofence alert resolved [${data.action}] by ${data.resolvedBy}`);
+      useGeofenceAlertStore.getState().resolveRemote(data.alertId, data.action);
+    };
+
     socket.on('users:online', onOnlineUsers);
     socket.on('call:incoming', onIncoming);
     socket.on('call:ringing', onRinging);
@@ -170,6 +191,8 @@ export const useCallSignaling = () => {
     socket.on('call:cancelled', onCancelled);
     socket.on('call:error', onError);
     socket.on('chat:receive', onChatReceive);
+    socket.on('geofence:alert', onGeofenceAlert);
+    socket.on('geofence:resolved', onGeofenceResolved);
 
     // Request initial online users
     socket.emit('users:getOnline');
@@ -185,6 +208,8 @@ export const useCallSignaling = () => {
       socket.off('call:cancelled', onCancelled);
       socket.off('call:error', onError);
       socket.off('chat:receive', onChatReceive);
+      socket.off('geofence:alert', onGeofenceAlert);
+      socket.off('geofence:resolved', onGeofenceResolved);
     };
   }, [user]);
 
