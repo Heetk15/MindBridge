@@ -17,20 +17,36 @@ class ChatbotService {
       const relevantDocs = await RAGService.search(message, 3)
 
       let contextualPrompt = message
+      let contextSection = ''
+      
       if (relevantDocs && relevantDocs.length > 0) {
-        const contextText = relevantDocs
-          .map((doc) => `- ${doc.content.substring(0, 150)}...`)
-          .join('\n')
+        // Use full content or up to 500 chars for better context
+        contextSection = relevantDocs
+          .map((doc, idx) => `[KNOWLEDGE BASE ${idx + 1}]:\n${doc.content.substring(0, 500)}\n---`)
+          .join('\n\n')
 
-        contextualPrompt = `Based on the following relevant information:\n${contextText}\n\nUser question: ${message}`
+        contextualPrompt = `CONTEXT FROM KNOWLEDGE BASE:\n${contextSection}\n\n[USER QUESTION]:\n${message}`
       }
+
+      const systemPrompt = `You are a compassionate AI companion for elderly users named MindBridge. You MUST prioritize using the provided knowledge base information to answer questions. 
+
+INSTRUCTIONS:
+1. ALWAYS refer to the knowledge base information provided above when answering
+2. Use specific details from the knowledge base to personalize your responses
+3. If the knowledge base contains relevant information, cite it directly or reference it
+4. Be warm, kind, and patient - speak in a friendly, easy-to-understand tone
+5. Address the user by their name (Margaret) when relevant
+6. Provide clear, actionable advice based on the knowledge base
+7. Never ignore the provided context - use it to make responses personal and specific
+
+KNOWLEDGE BASE COVERS: Family information, medical health conditions, nutrition, daily exercise routines, wellness tips, hobbies, and lifestyle guidance.`
 
       const response = await axios.post(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           contents: [
             {
-              parts: [{ text: contextualPrompt }],
+              parts: [{ text: `${systemPrompt}\n\n${contextualPrompt}` }],
             },
           ],
           generationConfig: {
@@ -84,15 +100,29 @@ class ChatbotService {
       const relevantDocs = await RAGService.search(message, 3)
 
       let contextualPrompt = message
+      let contextSection = ''
+      
       if (relevantDocs && relevantDocs.length > 0) {
-        const contextText = relevantDocs
-          .map((doc) => `- ${doc.content.substring(0, 150)}...`)
-          .join('\n')
+        // Use full content or up to 500 chars for better context
+        contextSection = relevantDocs
+          .map((doc, idx) => `[KNOWLEDGE BASE ${idx + 1}]:\n${doc.content.substring(0, 500)}\n---`)
+          .join('\n\n')
 
-        contextualPrompt = `Based on the following relevant information:\n${contextText}\n\nUser question: ${message}`
+        contextualPrompt = `CONTEXT FROM KNOWLEDGE BASE:\n${contextSection}\n\n[USER QUESTION]:\n${message}`
       }
 
-      const systemPrompt = `You are a helpful, compassionate AI assistant for elderly users. You have access to a knowledge base with information about health, wellness, family relationships, and daily life guidance. Be kind, patient, and provide clear, easy-to-understand responses. Speak in a warm and friendly tone. When relevant, refer to specific information from the knowledge base to provide personalized and accurate advice.`
+      const systemPrompt = `You are a compassionate AI companion for elderly users named MindBridge. You MUST prioritize using the provided knowledge base information to answer questions. 
+
+INSTRUCTIONS:
+1. ALWAYS refer to the knowledge base information provided above when answering
+2. Use specific details from the knowledge base to personalize your responses
+3. If the knowledge base contains relevant information, cite it directly or reference it
+4. Be warm, kind, and patient - speak in a friendly, easy-to-understand tone
+5. Address the user by their name (Margaret) when relevant
+6. Provide clear, actionable advice based on the knowledge base
+7. Never ignore the provided context - use it to make responses personal and specific
+
+KNOWLEDGE BASE COVERS: Family information, medical health conditions, nutrition, daily exercise routines, wellness tips, hobbies, and lifestyle guidance.`
 
       const response = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
