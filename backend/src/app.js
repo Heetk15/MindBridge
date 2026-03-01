@@ -28,6 +28,10 @@ app.use(cors({
       return callback(null, true)
     }
 
+    // Allow CORS_ORIGIN list (comma-separated in env)
+    const allowed = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean)
+    if (allowed.includes(origin)) return callback(null, true)
+
     // In development, allow all
     if (process.env.NODE_ENV !== 'production') {
       return callback(null, true)

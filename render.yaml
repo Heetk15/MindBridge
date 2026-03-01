@@ -1,0 +1,68 @@
+# Render Blueprint — auto-deploys backend when you connect this repo
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: mindbridge-backend
+    runtime: node
+    region: oregon
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      # ── Database ──
+      - key: MONGODB_URI
+        sync: false          # set manually in Render dashboard
+      - key: MONGODB_DB_NAME
+        value: mindbridge
+      # ── JWT ──
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: JWT_EXPIRE
+        value: 15m
+      - key: JWT_REFRESH_EXPIRE
+        value: 7d
+      # ── Twilio ──
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: TWILIO_API_KEY
+        sync: false
+      - key: TWILIO_API_SECRET
+        sync: false
+      - key: CAREGIVER_PHONE_NUMBER
+        sync: false
+      # ── AI ──
+      - key: AI_MODEL
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false
+      # ── Cloudinary ──
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # ── WhatsApp ──
+      - key: GREEN_API_INSTANCE_ID
+        sync: false
+      - key: GREEN_API_TOKEN
+        sync: false
+      - key: CAREGIVER_WHATSAPP_NUMBER
+        sync: false
+      # ── CORS — set this to your Vercel frontend URL ──
+      - key: CORS_ORIGIN
+        value: https://your-app.vercel.app

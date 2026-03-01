@@ -23,16 +23,22 @@ const startServer = async () => {
     // Create HTTP server from Express app
     server = http.createServer(app)
 
-    // Initialize Socket.io with CORS for LAN access
+    // Initialize Socket.io with CORS for LAN + production access
     const io = new Server(server, {
       cors: {
         origin: function (origin, callback) {
-          // Allow all local network origins for LAN video calls
-          if (!origin || origin.match(/^https?:\/\/(localhost|127\.0\.0\.1|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/)) {
-            callback(null, true)
-          } else {
-            callback(null, true) // Allow all in dev
+          // Allow requests with no origin (mobile apps, curl)
+          if (!origin) return callback(null, true)
+          // Allow local network origins for LAN video calls
+          if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/)) {
+            return callback(null, true)
           }
+          // Allow CORS_ORIGIN list (production frontend URL)
+          const allowed = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean)
+          if (allowed.includes(origin)) return callback(null, true)
+          // In development, allow all
+          if (process.env.NODE_ENV !== 'production') return callback(null, true)
+          callback(new Error('Not allowed by CORS'))
         },
         credentials: true,
       },

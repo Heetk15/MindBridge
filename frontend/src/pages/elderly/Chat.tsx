@@ -18,13 +18,13 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useChatStore } from '../../store/chatStore'
-import ChatMessage from '../../components/Chatbot/ChatMessage'
-import VoiceRecorder from '../../components/Chatbot/VoiceRecorder'
-import KnowledgeBaseModal from '../../components/Chatbot/KnowledgeBaseModal'
+import ChatMessage from '../../components/chatbot/ChatMessage'
+import VoiceRecorder from '../../components/chatbot/VoiceRecorder'
+import KnowledgeBaseModal from '../../components/chatbot/KnowledgeBaseModal'
 import EmergencyBanner from '../../components/emergency/EmergencyBanner'
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api'
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5004/api`
 
 const LANGUAGES = [
   { code: 'auto', label: 'Auto-detect', flag: '🌐', ttsLang: '' },

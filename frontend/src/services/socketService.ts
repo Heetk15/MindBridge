@@ -8,9 +8,12 @@ let socket: Socket | null = null;
  */
 export const getSocket = (): Socket => {
   if (!socket) {
-    const backendPort = '5004';
-    // Use same hostname as the browser so LAN access works automatically
-    const baseUrl = `http://${window.location.hostname}:${backendPort}`;
+    // In production, derive socket URL from VITE_API_URL (strip /api path)
+    // In dev, use same hostname as browser so LAN access works automatically
+    const apiUrl = import.meta.env.VITE_API_URL as string | undefined;
+    const baseUrl = apiUrl
+      ? new URL(apiUrl).origin
+      : `http://${window.location.hostname}:5004`;
     
     socket = io(baseUrl, {
       transports: ['websocket', 'polling'],
