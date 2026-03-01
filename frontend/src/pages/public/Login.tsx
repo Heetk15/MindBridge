@@ -79,9 +79,10 @@ const Login = () => {
       });
 
       if (response.data.success) {
-        phoneLogin(phoneNumber, response.data.data.token, role);
+        const { token: authToken, user: dbUser } = response.data.data;
+        await phoneLogin(dbUser, authToken);
         navigate(
-          role === 'elderly'
+          dbUser.role === 'elderly'
             ? '/elderly/dashboard'
             : '/caregiver/dashboard'
         );

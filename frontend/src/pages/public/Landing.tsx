@@ -165,13 +165,13 @@ const Landing = () => {
                   to="/signup"
                   className="px-8 py-4 bg-white text-primary rounded-full font-semibold hover:scale-105 transition shadow-lg"
                 >
-                  Get Matched Free
+                  Sign Up
                 </Link>
                 <Link
                   to="/login"
                   className="px-8 py-4 border border-white/60 rounded-full hover:bg-white/10 transition"
                 >
-                  Caregiver Login
+                  Log In
                 </Link>
               </motion.div>
             </div>

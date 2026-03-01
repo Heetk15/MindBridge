@@ -276,7 +276,7 @@ const Signup = () => {
               <MBButton 
                 type="button" 
                 onClick={() => setStep('details')} 
-                variant="outline"
+                variant="ghost"
                 className="flex-1 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-medium"
               >
                 Back

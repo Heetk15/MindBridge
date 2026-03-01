@@ -17,7 +17,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  phoneLogin: (phoneNumber: string, token: string, role: UserRole) => Promise<void>;
+  phoneLogin: (userData: { _id: string; name: string; role: UserRole; phoneNumber: string; email?: string }, token: string) => Promise<void>;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
   signup: (name: string, email: string, password: string, role: UserRole, phoneNumber?: string) => Promise<void>;
   setDebugUser: (user: User, token: string) => void;
@@ -29,13 +29,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   token: savedToken,
   isAuthenticated: !!(savedToken && savedUser),
 
-  phoneLogin: async (phoneNumber, token, role) => {
+  phoneLogin: async (userData, token) => {
     try {
       const user: User = {
-        id: phoneNumber.replace(/\D/g, ''),
-        phoneNumber,
-        role,
-        name: `User ${phoneNumber.slice(-4)}`,
+        id: userData._id,
+        name: userData.name,
+        role: userData.role,
+        phoneNumber: userData.phoneNumber,
+        email: userData.email,
       };
       set({ user, token, isAuthenticated: true });
       localStorage.setItem('authToken', token);

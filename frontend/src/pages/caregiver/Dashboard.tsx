@@ -28,6 +28,7 @@ import { motion, Variants } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import QRScanner from '@/components/health/QRScanner';
 import { DashboardCard } from '@/components/dashboard/DashboardCard';
+import { useAuthStore } from '@/store/authStore';
 
 // Types for variants
 const containerVariants: Variants = {
@@ -55,6 +56,7 @@ const itemVariants: Variants = {
 
 
 const CaregiverDashboard = () => {
+  const { user } = useAuthStore();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [alerts, setAlerts] = useState(3);
@@ -105,7 +107,7 @@ const CaregiverDashboard = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <h1 className="text-4xl font-serif font-bold text-slate-900 dark:text-white">
-                Welcome back, Sarah
+                Welcome back, {user?.name || 'Caregiver'}
               </h1>
               <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg flex items-center gap-2">
                 <Clock size={18} className="inline" />
