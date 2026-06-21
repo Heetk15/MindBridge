@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5004/api
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5004"
+    env_file:
+      - .env
+    environment:
+      - CHROMA_URL=http://chroma:8000
+    depends_on:
+      - mongo
+      - chroma
+    volumes:
+      - backend-data:/app/data
+      - backend-logs:/app/logs
+
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  chroma:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/chroma/chroma
+
+volumes:
+  backend-data:
+  backend-logs:
+  mongo-data:
+  chroma-data:

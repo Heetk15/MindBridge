@@ -1,0 +1,102 @@
+[
+  {
+    "category": "Medication",
+    "question": "Did I take my pill today?",
+    "retrievedChunks": 0,
+    "ragUsed": false,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Medication",
+    "question": "What time am I supposed to take my heart medicine?",
+    "retrievedChunks": 3,
+    "ragUsed": true,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Medication",
+    "question": "I feel dizzy, should I skip my Metoprolol?",
+    "retrievedChunks": 0,
+    "ragUsed": false,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Medication",
+    "question": "Can I take ibuprofen for my headache? I am allergic to penicillin.",
+    "retrievedChunks": 3,
+    "ragUsed": true,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Medication",
+    "question": "What is Donepezil for?",
+    "retrievedChunks": 3,
+    "ragUsed": true,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Medication",
+    "question": "Is it safe to drink grapefruit juice with my pills?",
+    "retrievedChunks": 3,
+    "ragUsed": true,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Emergency",
+    "question": "I fell down and my hip hurts really bad.",
+    "retrievedChunks": 3,
+    "ragUsed": true,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Emergency",
+    "question": "Who should I call if I need help?",
+    "retrievedChunks": 0,
+    "ragUsed": false,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Emergency",
+    "question": "My chest feels tight and my arm is numb.",
+    "retrievedChunks": 3,
+    "ragUsed": true,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  },
+  {
+    "category": "Emergency",
+    "question": "I cannot remember where I am.",
+    "retrievedChunks": 3,
+    "ragUsed": true,
+    "structuredUsed": true,
+    "responseA": "",
+    "responseB": "",
+    "evaluation": null
+  }
+]

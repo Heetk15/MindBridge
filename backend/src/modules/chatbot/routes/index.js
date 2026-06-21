@@ -6,8 +6,6 @@ const router = express.Router()
 /** POST /api/chatbot/send – Send a text message */
 router.post('/send', ChatbotController.sendMessage)
 
-/** POST /api/chatbot/voice – Send a voice message */
-router.post('/voice', ChatbotController.sendVoiceMessage)
 
 /** POST /api/chatbot/conversation – Create a new conversation */
 router.post('/conversation', ChatbotController.createConversation)

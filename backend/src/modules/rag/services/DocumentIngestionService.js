@@ -150,13 +150,50 @@ class DocumentIngestionService {
           const filePath = path.join(directory, file)
           const content = await fs.readFile(filePath, 'utf-8')
 
+          let parsedContent = content;
+          let topic = 'general';
+          let severity = 'low';
+          let audience = 'both';
+          let source_type = 'curated_internal';
+          let author_authority = 'MindBridge Team';
+          let citation_url = '';
+
+          if (content.startsWith('---')) {
+            const endIdx = content.indexOf('---', 3);
+            if (endIdx !== -1) {
+              const frontmatter = content.substring(3, endIdx);
+              parsedContent = content.substring(endIdx + 3).trim();
+              
+              const lines = frontmatter.split('\n');
+              for (const line of lines) {
+                const match = line.match(/^(\w+):\s*(.+)$/);
+                if (match) {
+                  const key = match[1].toLowerCase();
+                  const val = match[2].trim();
+                  if (key === 'topic') topic = val;
+                  if (key === 'severity') severity = val;
+                  if (key === 'audience') audience = val;
+                  if (key === 'source_type') source_type = val;
+                  if (key === 'author_authority') author_authority = val;
+                  if (key === 'citation_url') citation_url = val;
+                }
+              }
+            }
+          }
+
           documents.push({
-            content,
+            content: parsedContent,
             metadata: {
               source: file,
               category: path.basename(directory),
+              topic,
+              severity,
+              audience,
+              source_type,
+              author_authority,
+              citation_url,
               date_added: new Date().toISOString(),
-              tags: [path.basename(directory)],
+              tags: [path.basename(directory), topic],
             },
           })
         }

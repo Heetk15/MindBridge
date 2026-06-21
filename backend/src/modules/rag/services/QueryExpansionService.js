@@ -72,21 +72,20 @@ class QueryExpansionService {
     return Array.from(expandedTerms)
   }
 
-  /**
-   * Create expanded query string
-   */
   static getExpandedQueryString(query) {
-    const expandedTerms = this.expandQuery(query)
-    return expandedTerms.join(' ')
+    // Phase 4: Return raw natural language query to preserve semantic embedding quality
+    // Sentence transformers degrade when fed keyword salads.
+    return query
   }
 
   /**
    * Extract keywords from query for fallback search
    */
   static extractKeywords(query) {
-    const stopWords = ['that', 'this', 'what', 'when', 'where', 'which', 'help', 'tell', 'give', 'does', 'about', 'with', 'from', 'have', 'been', 'will', 'would', 'could', 'should', 'also', 'just', 'like', 'some', 'they', 'them', 'than', 'then', 'more', 'very', 'much', 'many']
+    const stopWords = ['that', 'this', 'what', 'when', 'where', 'which', 'help', 'tell', 'give', 'does', 'about', 'with', 'from', 'have', 'been', 'will', 'would', 'could', 'should', 'also', 'just', 'like', 'some', 'they', 'them', 'than', 'then', 'more', 'very', 'much', 'many', 'can', 'how', 'why', 'who', 'the', 'and', 'for', 'are', 'you']
     return query
       .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Strip punctuation
       .split(/\s+/)
       .filter((word) => word.length >= 2)
       .filter((word) => !stopWords.includes(word))

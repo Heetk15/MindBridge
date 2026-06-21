@@ -13,6 +13,15 @@ let server = null
 
 // Initialize and start server
 const startServer = async () => {
+  // Validate critical environment variables
+  const requiredEnvVars = ['MONGODB_URI', 'JWT_SECRET']
+  const missingEnvVars = requiredEnvVars.filter(key => !process.env[key])
+  
+  if (missingEnvVars.length > 0) {
+    console.error(`❌ FATAL ERROR: Missing required environment variables: ${missingEnvVars.join(', ')}`)
+    process.exit(1)
+  }
+
   try {
     // Connect to MongoDB
     await connectDB()

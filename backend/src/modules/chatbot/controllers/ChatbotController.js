@@ -1,7 +1,11 @@
-﻿'use strict'
+'use strict'
 
 const mongoose                 = require('mongoose')
 const ChatbotService            = require('../services/ChatbotService')
+const UserContextService        = require('../services/UserContextService')
+const ContextAssembler          = require('../services/ContextAssembler')
+const IntentClassifier          = require('../services/IntentClassifier')
+const RAGService                = require('../../rag/services/RAGService')
 const EmergencyDetectionService = require('../../alerts/services/EmergencyDetectionService')
 const ConfirmationStateMachine  = require('../../alerts/services/ConfirmationStateMachine')
 const Conversation              = require('../../../models/Conversation')
@@ -106,6 +110,7 @@ class ChatbotController {
       }
 
       // ── Context ──
+      const startTime = Date.now()
       const context = getContext(conversationId)
       pushContext(conversationId, message)
 
@@ -120,12 +125,18 @@ class ChatbotController {
         )
       }
 
+      // ── Intent Routing & Retrieval ──
+      const intentMode = await IntentClassifier.classify(message)
+      const userState = await UserContextService.getContext(sessionUserId)
+      const ragDocs = await RAGService.search(message, 3)
+      const assembledPrompt = ContextAssembler.assemble(userState, ragDocs, message, context, intentMode)
+
       // ── AI + Emergency in parallel ──
       const model = ChatbotService.getConfiguredModel()
       const [aiResult, emergencyResult] = await Promise.all([
         model === 'gemini'
-          ? ChatbotService.sendToGemini(message, language)
-          : ChatbotService.sendToGroq(message, language),
+          ? ChatbotService.sendToGemini(assembledPrompt, language)
+          : ChatbotService.sendToGroq(assembledPrompt, language),
         pendingState !== 'awaiting_confirm'
           ? EmergencyDetectionService.detectAndProcess(
               sessionUserId, message, context, location || null, userMeta || {}
@@ -134,6 +145,18 @@ class ChatbotController {
       ])
 
       EmergencyDetectionService.processAutoEscalations().catch(() => {})
+
+      // ── Retrieval Logging (Observability) ──
+      const categories = [...new Set(ragDocs.map(d => d.metadata?.category).filter(Boolean))];
+      const scores = ragDocs.map(d => Number(d.similarity || d.score || 0));
+
+      console.log(`[Retrieval Observability]`, JSON.stringify({
+        query: message,
+        intent: intentMode,
+        chunksReturned: ragDocs.length,
+        categories: categories,
+        scores: scores
+      }, null, 2))
 
       // ── Persist both messages to MongoDB ──
       if (conversationId && mongoose.Types.ObjectId.isValid(conversationId)) {
@@ -171,7 +194,7 @@ class ChatbotController {
         conversationId,
         reply: aiResult.reply,
         model: aiResult.model,
-        context: aiResult.context || [],
+        context: ragDocs || [],
         metadata: { timestamp: new Date(), tokens: aiResult.tokens },
         emergency: emergency
           ? {
@@ -196,78 +219,6 @@ class ChatbotController {
     }
   }
 
-  // ── POST /api/chatbot/voice ─────────────────────────────────────────────────
-  static async sendVoiceMessage(req, res) {
-    try {
-      const { audio, conversationId, userId, location, userMeta } = req.body
-
-      if (!audio) return res.status(400).json({ error: 'Audio data is required' })
-      if (!ChatbotService.isConfigured()) return res.status(503).json({ error: 'AI service not configured' })
-
-      const model = ChatbotService.getConfiguredModel()
-      const transcriptionResult = await ChatbotService.transcribeAudio(audio)
-      const transcription = transcriptionResult.transcription
-
-      const sessionUserId = userId || conversationId || 'anonymous'
-      const context = getContext(conversationId)
-      pushContext(conversationId, transcription)
-
-      const [aiResult, emergencyResult] = await Promise.all([
-        model === 'gemini'
-          ? ChatbotService.sendToGemini(transcription)
-          : ChatbotService.sendToGroq(transcription),
-        EmergencyDetectionService.detectAndProcess(
-          sessionUserId, transcription, context, location || null, userMeta || {}
-        ),
-      ])
-
-      // ── Persist to MongoDB ──
-      if (conversationId && mongoose.Types.ObjectId.isValid(conversationId)) {
-        try {
-          await Conversation.findByIdAndUpdate(
-            conversationId,
-            {
-              $push: {
-                messages: {
-                  $each: [
-                    { sender: 'user', text: transcription,  timestamp: new Date() },
-                    { sender: 'ai',   text: aiResult.reply, timestamp: new Date(), mood: 'caring' },
-                  ],
-                },
-              },
-              $inc: { messageCount: 2 },
-              $set: { aiModel: aiResult.model },
-            }
-          )
-        } catch (dbErr) {
-          console.error('[ChatbotController] MongoDB voice push failed:', dbErr.message)
-        }
-      }
-
-      return res.json({
-        success: true,
-        conversationId,
-        transcription,
-        reply: aiResult.reply,
-        model: aiResult.model,
-        emergency: emergencyResult?.emergency
-          ? {
-              detected:            true,
-              severity:            emergencyResult.severity,
-              severityLevel:       emergencyResult.severityLevel,
-              score:               emergencyResult.score,
-              matchedKeywords:     emergencyResult.matchedKeywords || [],
-              action:              emergencyResult.action,
-              confirmationMessage: emergencyResult.confirmationMessage || null,
-              telegramSent:        emergencyResult.telegramSent || false,
-            }
-          : null,
-      })
-    } catch (error) {
-      console.error('Voice message error:', error)
-      res.status(500).json({ error: error.message || 'Failed to process voice message' })
-    }
-  }
 
   // ── POST /api/chatbot/conversation ─────────────────────────────────────────
   static async createConversation(req, res) {

@@ -1,6 +1,7 @@
 const fs = require('fs').promises
 const path = require('path')
 const { env, AutoTokenizer, AutoModel } = require('@xenova/transformers')
+const QueryExpansionService = require('./QueryExpansionService')
 
 // Store model and tokenizer globally to avoid reloading
 let model = null
@@ -250,8 +251,7 @@ class SimpleVectorStore {
    * Keyword-based search as fallback
    */
   async keywordSearch(query, nResults = 5) {
-    const queryLower = query.toLowerCase()
-    const queryWords = queryLower.split(/\s+/).filter(w => w.length > 2)
+    const queryWords = QueryExpansionService.extractKeywords(query)
 
     const scored = this.documents.map((doc) => {
       const contentLower = doc.content.toLowerCase()

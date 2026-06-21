@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Backend - Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Backend - Lint
+        working-directory: ./backend
+        run: npm run lint --if-present
+
+      - name: Frontend - Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Frontend - Lint
+        working-directory: ./frontend
+        run: npm run lint --if-present
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Backend - Install
+        working-directory: ./backend
+        run: npm ci
+
+      # Note: We skip `npm start` here, we just ensure dependencies install cleanly for the backend
+
+      - name: Frontend - Install
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Frontend - Build
+        working-directory: ./frontend
+        run: npm run build
