@@ -1,0 +1,26 @@
+---
+topic: confusion and agitation
+severity: high
+audience: caregiver
+source_type: external_authority
+author_authority: Alzheimer's Association
+citation_url: https://www.alz.org/help-support/caregiving/stages-behaviors/agitation-and-anxiety
+---
+# Responding to Agitation and Confusion
+
+Agitation and confusion are common behavioral symptoms of Alzheimer's and other dementias. A person with dementia may become restless, pace, become upset, or experience hallucinations.
+
+## Causes of Agitation
+- **Medical reasons**: Pain, infection (such as UTIs), constipation, or medication interactions.
+- **Environmental factors**: Overstimulation from noise, clutter, or unfamiliar surroundings.
+- **Personal needs**: Hunger, thirst, the need to use the restroom, or lack of sleep.
+
+## How to Respond
+1. **Check for pain or illness**: Ensure the person is not suffering from an underlying medical condition.
+2. **Create a calm environment**: Reduce noise, clear clutter, and provide soothing music or familiar objects.
+3. **Listen to the frustration**: Acknowledge their feelings. Do not try to reason or argue. Say things like, "I understand you're upset" or "You are safe here."
+4. **Redirect attention**: Offer a snack, suggest a walk, or involve them in a simple, repetitive task like folding towels.
+5. **Keep yourself calm**: Your anxiety can transfer to the person with dementia. Speak in a gentle, reassuring tone.
+
+## When to Call a Doctor
+If the agitation is sudden, severe, or poses a danger to the person or others, contact a medical professional immediately. Sudden confusion is often the primary sign of an acute medical issue like a Urinary Tract Infection (UTI).

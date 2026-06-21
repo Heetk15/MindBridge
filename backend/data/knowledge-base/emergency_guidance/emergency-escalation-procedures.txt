@@ -1,0 +1,25 @@
+---
+topic: escalation
+severity: high
+audience: caregiver
+---
+# Medical Escalation Procedures
+
+## Knowing Who to Call
+Keep a prioritized list of contacts visible:
+1. Emergency Services (911)
+2. Primary Care Physician
+3. Specialist Doctors (e.g., Cardiologist, Neurologist)
+4. Nearest Urgent Care Center
+5. Designated Family Members
+
+## When to go to the ER vs Urgent Care
+- **ER:** Chest pain, difficulty breathing, sudden numbness/weakness, severe bleeding, major head injury.
+- **Urgent Care:** Minor cuts needing stitches, minor sprains, fever without other severe symptoms, minor infections.
+
+## Preparing for the Hospital
+Keep a "Go Bag" ready containing:
+- Current medication list and medical history.
+- Insurance cards and ID.
+- Advanced directives or DNR orders.
+- A change of clothes and basic toiletries.

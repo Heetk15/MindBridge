@@ -1,0 +1,17 @@
+---
+topic: exercise
+severity: low
+audience: both
+---
+# Exercise for Seniors
+
+## Types of Exercise
+- **Cardiovascular:** Walking, swimming, or stationary cycling improves heart health. Aim for 150 minutes a week.
+- **Strength Training:** Using light weights or resistance bands helps maintain muscle mass and bone density.
+- **Flexibility:** Stretching exercises like yoga keep joints mobile.
+- **Balance:** Tai chi or standing on one foot near a sturdy chair helps prevent falls.
+
+## Getting Started Safely
+- Always consult a physician before starting a new exercise regimen.
+- Start with 5-10 minute sessions and gradually increase.
+- Listen to your body; stop if you feel pain, dizziness, or shortness of breath.

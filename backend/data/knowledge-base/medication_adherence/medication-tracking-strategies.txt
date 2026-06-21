@@ -1,0 +1,17 @@
+---
+topic: tracking
+severity: medium
+audience: both
+---
+# Strategies for Tracking Medication
+
+## Visual Reminders
+Place the pillbox in a highly visible location, such as the kitchen table, where it will be seen at meal times.
+
+## Technology Aids
+- Use smart pillboxes that light up or beep when it is time for a dose.
+- Set recurring alarms on a smartphone or smart speaker.
+- Use the MindBridge app's medication reminder feature.
+
+## Routine Integration
+Tie medication administration to an existing daily habit, such as brushing teeth or drinking morning coffee.

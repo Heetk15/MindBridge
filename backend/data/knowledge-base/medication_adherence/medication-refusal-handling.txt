@@ -1,0 +1,17 @@
+---
+topic: refusal
+severity: high
+audience: caregiver
+---
+# Handling Medication Refusal
+
+## Identify the Reason
+Determine why they are refusing. Is the pill too large to swallow? Does it taste bad? Are they experiencing side effects? Or are they simply confused?
+
+## Solutions
+- If swallowing is difficult, ask the pharmacist if the pill can be crushed or if a liquid form is available.
+- If they are suspicious, try explaining clearly what the medication is for, or have the doctor explain it during a visit.
+- If agitation is the cause, take a break and try again in 15-30 minutes.
+
+## Never Force
+Never physically force someone to take medication. If refusal continues and the medication is critical, contact a healthcare professional.

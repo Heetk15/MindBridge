@@ -1,0 +1,22 @@
+---
+topic: stroke
+severity: critical
+audience: both
+---
+# Recognizing a Stroke: FAST
+
+## The FAST Protocol
+A stroke is a medical emergency. Use the FAST test:
+- **F**ace: Ask the person to smile. Does one side of the face droop?
+- **A**rms: Ask them to raise both arms. Does one arm drift downward?
+- **S**peech: Ask them to repeat a simple phrase. Is their speech slurred or strange?
+- **T**ime: If you observe any of these signs, call 911 immediately.
+
+## Other Symptoms
+- Sudden numbness or weakness in the face, arm, or leg.
+- Sudden trouble seeing in one or both eyes.
+- Sudden severe headache with no known cause.
+- Sudden trouble walking, dizziness, loss of balance.
+
+## Critical Action
+Note the time when symptoms first appeared. This is crucial for emergency responders.

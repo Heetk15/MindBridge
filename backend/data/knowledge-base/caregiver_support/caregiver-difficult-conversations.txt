@@ -1,0 +1,17 @@
+---
+topic: communication
+severity: medium
+audience: caregiver
+---
+# Having Difficult Conversations
+
+## Driving Safety
+When it's time to stop driving:
+- Approach the topic with empathy, not accusation.
+- Focus on safety, using statements like "I am worried about your safety on the road."
+- Offer alternatives, such as driving them yourself or arranging transportation services.
+
+## Moving to Assisted Living
+- Start the conversation early, before a crisis occurs.
+- Highlight the benefits, such as social activities and no home maintenance.
+- Involve them in the decision-making process as much as possible.

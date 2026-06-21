@@ -1,0 +1,24 @@
+---
+topic: dementia caregiving
+severity: medium
+audience: caregiver
+source_type: external_authority
+author_authority: National Institute on Aging (NIA)
+citation_url: https://www.nia.nih.gov/health/alzheimers-caregiving
+---
+# Caregiver Support and Dementia Care
+
+Caring for a person with Alzheimer’s disease or a related dementia can be both rewarding and challenging. As the disease progresses, the person will need more help with everyday tasks.
+
+## Daily Routines and Communication
+- **Keep routines consistent**: Try to do things at the same time every day.
+- **Simplify tasks**: Break down activities like dressing or bathing into simple, step-by-step instructions.
+- **Use simple language**: Speak slowly and clearly. Ask one question at a time and wait patiently for an answer.
+- **Avoid arguing**: If the person is confused about the time or place, do not argue. Validate their reality and gently redirect them.
+
+## Caregiver Burnout Prevention
+It is critical for caregivers to take care of themselves. The stress of caregiving can lead to burnout, depression, and health problems.
+- **Ask for help**: Don't try to do it all alone. Ask family members or friends to step in.
+- **Use respite care**: Look into adult day programs or short-term care services to get a break.
+- **Join a support group**: Connecting with others who understand what you are going through can reduce feelings of isolation.
+- **Take care of your health**: Eat well, exercise, and keep your own medical appointments.

@@ -1,0 +1,19 @@
+---
+topic: nutrition
+severity: low
+audience: both
+---
+# Senior Nutrition Guidelines
+
+## Essential Nutrients
+- **Calcium and Vitamin D:** Crucial for bone health. Sources include fortified milk, yogurt, and leafy greens.
+- **Vitamin B12:** Important for nerve function. Found in meat, fish, poultry, and fortified cereals.
+- **Fiber:** Helps prevent constipation. Sources include whole grains, beans, fruits, and vegetables.
+
+## Overcoming Poor Appetite
+- Serve smaller, more frequent meals instead of three large ones.
+- Enhance flavor with herbs and spices rather than salt.
+- Ensure the dining environment is pleasant and social.
+
+## Hydration
+Seniors should aim for 6-8 glasses of fluid a day, unless restricted by a doctor. Soups, fruits, and vegetables also contribute to fluid intake.

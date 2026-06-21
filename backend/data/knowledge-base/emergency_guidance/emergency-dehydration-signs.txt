@@ -1,0 +1,21 @@
+---
+topic: dehydration
+severity: high
+audience: caregiver
+---
+# Signs of Severe Dehydration
+
+## Why Seniors are at Risk
+Seniors often have a reduced sense of thirst and may be on medications (like diuretics) that increase fluid loss.
+
+## Warning Signs
+- Extreme thirst (though some may not feel thirsty).
+- Very dry mouth and swollen tongue.
+- Confusion, dizziness, or lethargy.
+- Dark-colored urine or lack of urination for over 8 hours.
+- Sunken eyes.
+
+## Action Steps
+- Offer clear fluids immediately (water, oral rehydration solutions).
+- Do not give sugary or caffeinated drinks.
+- If the person is confused, unable to keep fluids down, or extremely weak, seek immediate medical attention.

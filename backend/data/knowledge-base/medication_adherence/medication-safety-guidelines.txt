@@ -1,0 +1,17 @@
+---
+topic: safety
+severity: critical
+audience: both
+---
+# General Medication Safety
+
+## Understanding the Prescription
+Always read the label carefully. Understand whether the medication should be taken with food, on an empty stomach, or at a specific time of day.
+
+## Avoiding Interactions
+- Provide all doctors with a comprehensive list of medications, including over-the-counter drugs and supplements.
+- Use one primary pharmacy so they can check for potential drug interactions.
+- Avoid mixing medications with alcohol.
+
+## Proper Disposal
+Do not flush old or unused medications down the toilet. Use community drug take-back programs or mix them with undesirable substances (like coffee grounds) before throwing them in the trash.

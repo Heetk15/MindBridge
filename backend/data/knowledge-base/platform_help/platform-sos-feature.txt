@@ -1,0 +1,17 @@
+---
+topic: sos
+severity: high
+audience: both
+---
+# How to Use the SOS Feature
+
+## What is the SOS Button?
+The SOS button is a large, red emergency button located on the home screen of the MindBridge app. It is designed for immediate assistance in critical situations.
+
+## Activating SOS
+1. Press and hold the red SOS button for 3 seconds.
+2. The app will immediately send an emergency alert (SMS and push notification) to all designated primary caregivers.
+3. It will also display a prompt asking if you want to dial 911 directly from your device.
+
+## False Alarms
+If you press the button by mistake, you have a 10-second window to tap "Cancel" before the alerts are dispatched.

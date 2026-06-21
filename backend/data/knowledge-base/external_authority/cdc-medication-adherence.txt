@@ -1,0 +1,24 @@
+---
+topic: medication adherence
+severity: high
+audience: both
+source_type: external_authority
+author_authority: Centers for Disease Control and Prevention (CDC)
+citation_url: https://www.cdc.gov/heartdisease/medication_adherence.htm
+---
+# Medication Adherence and Safety
+
+Taking medications correctly is vital for managing chronic conditions, preventing hospitalizations, and maintaining overall health. For older adults, particularly those with cognitive impairments like dementia, managing medications safely is a top priority.
+
+## Strategies for Safe Medication Use
+- **Use a pill organizer**: Sort medications by day and time to avoid missed doses or accidental double-dosing.
+- **Set alarms and reminders**: Use phone alarms, digital clocks, or automated medication dispensers to prompt you when it's time to take your pills.
+- **Keep an updated list**: Always carry a current list of all medications, including over-the-counter drugs, vitamins, and supplements. Share this list with all healthcare providers.
+- **Understand your medications**: Know what each medication is for, the correct dosage, and potential side effects.
+
+## Handling Refusals
+If a person with dementia refuses to take their medication:
+- **Do not force them**: This can cause distress and agitation.
+- **Try again later**: Sometimes waiting 10-15 minutes and approaching them again in a different setting works.
+- **Check for physical issues**: They might have difficulty swallowing or dislike the taste. Consult a pharmacist about alternative forms (e.g., liquid instead of pills).
+- **Contact a doctor**: If refusal persists, contact their healthcare provider for guidance. Never hide medication in food without professional advice.

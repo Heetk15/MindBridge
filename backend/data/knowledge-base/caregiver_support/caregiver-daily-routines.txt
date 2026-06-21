@@ -1,0 +1,17 @@
+---
+topic: routines
+severity: low
+audience: caregiver
+---
+# Establishing Daily Routines
+
+## The Importance of Routine
+A predictable routine reduces anxiety for the person receiving care and makes the caregiver's day more manageable.
+
+## Creating a Schedule
+- Wake up and go to bed at the same time every day.
+- Schedule meals, medications, and activities at consistent times.
+- Build in buffer times for unexpected delays.
+
+## Flexibility
+While routine is important, be prepared to adapt if the person is having a bad day. Rigidity can lead to frustration.

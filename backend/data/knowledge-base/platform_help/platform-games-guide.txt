@@ -1,0 +1,19 @@
+---
+topic: games
+severity: low
+audience: elderly
+---
+# Using MindBridge Cognitive Games
+
+## Accessing Games
+Go to the "Cognitive Health" or "Games" section from the main menu. Here you will find a selection of games designed to improve memory, attention, and problem-solving.
+
+## Recommended Usage
+- We recommend playing for 15-20 minutes a day.
+- Start with the "Beginner" levels and progress as you feel comfortable.
+- The platform tracks your progress over time, which you can view in the "My Stats" area.
+
+## Types of Games
+- **Memory Match:** Improves short-term memory.
+- **Word Search:** Enhances vocabulary and pattern recognition.
+- **Daily Trivia:** Stimulates recall and general knowledge.

@@ -1,0 +1,20 @@
+---
+topic: confusion
+severity: medium
+audience: caregiver
+---
+# Handling Dementia Confusion
+
+## Understanding the Cause
+Confusion in dementia patients can be triggered by changes in routine, environment, or medication. It is important to approach the situation with calmness and patience.
+
+## De-escalation Techniques
+- Do not argue or try to correct the person.
+- Validate their feelings by saying, "I understand you are feeling confused right now."
+- Gently redirect their attention to a familiar and calming activity.
+- Ensure the environment is well-lit and free of loud noises.
+
+## Prevention Strategies
+- Maintain a consistent daily routine.
+- Use visual cues, like large clocks and calendars.
+- Keep the living space organized and clutter-free.

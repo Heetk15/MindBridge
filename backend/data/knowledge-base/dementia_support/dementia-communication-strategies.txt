@@ -1,0 +1,17 @@
+---
+topic: communication
+severity: medium
+audience: caregiver
+---
+# Communication Strategies for Dementia
+
+## Keep It Simple
+Use short, simple sentences. Ask one question at a time and wait for a response.
+
+## Non-Verbal Communication
+- Maintain eye contact and stay at their eye level.
+- Use hand gestures to demonstrate what you mean.
+- Ensure your facial expressions are relaxed and friendly.
+
+## Patience is Key
+Give the person ample time to process information and respond. Avoid interrupting or finishing their sentences for them.

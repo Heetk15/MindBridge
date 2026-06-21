@@ -1,0 +1,20 @@
+---
+topic: chest pain
+severity: critical
+audience: both
+---
+# Responding to Chest Pain
+
+## Heart Attack Symptoms
+Chest pain should always be taken seriously. Symptoms of a heart attack include:
+- Pressure, tightness, pain, or a squeezing or aching sensation in the chest or arms.
+- Pain spreading to the neck, jaw, or back.
+- Nausea, indigestion, heartburn, or abdominal pain.
+- Shortness of breath.
+- Cold sweat, fatigue, or lightheadedness.
+
+## Action Steps
+- Call 911 immediately. Do not attempt to drive the person to the hospital yourself.
+- Have the person sit down, rest, and try to keep them calm.
+- Loosen any tight clothing.
+- If prescribed, administer nitroglycerin as directed while waiting for help.

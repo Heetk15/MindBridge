@@ -1,0 +1,17 @@
+---
+topic: reminders
+severity: low
+audience: both
+---
+# Setting Up Reminders in MindBridge
+
+## Adding a New Reminder
+1. Navigate to the "Reminders" tab on the main dashboard.
+2. Click the "+" or "Add New" button.
+3. Enter the title of the reminder (e.g., "Take blood pressure medication").
+4. Select the date and time.
+5. Choose the frequency (e.g., Daily, Weekly) if it is a recurring event.
+
+## Customizing Alerts
+- You can choose whether the reminder sends a push notification, an SMS, or a voice call.
+- Caregivers can set reminders to notify them if the elderly user does not acknowledge the alert within 30 minutes.

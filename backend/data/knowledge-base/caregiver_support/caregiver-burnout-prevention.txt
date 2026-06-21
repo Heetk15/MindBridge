@@ -1,0 +1,19 @@
+---
+topic: burnout
+severity: high
+audience: caregiver
+---
+# Preventing Caregiver Burnout
+
+## Recognizing Burnout
+Signs of burnout include constant exhaustion, irritability, sleep issues, and feeling a loss of purpose. Recognizing these signs early is crucial.
+
+## Self-Care Strategies
+- Schedule daily "me time," even if it's just 15 minutes.
+- Engage in regular physical activity and maintain a healthy diet.
+- Practice mindfulness or meditation.
+
+## Seeking Help
+- Do not hesitate to ask family members for assistance.
+- Consider professional respite care services.
+- Join a caregiver support group to share experiences and receive emotional support.

@@ -1,0 +1,17 @@
+---
+topic: profile
+severity: low
+audience: both
+---
+# Managing Your MindBridge Profile
+
+## Updating Medical Information
+It is crucial to keep medical information up to date for emergency purposes.
+1. Go to "Profile" -> "Medical Info".
+2. Update current medications, allergies, and primary physician contact details.
+3. Save changes.
+
+## Changing Emergency Contacts
+1. Navigate to "Profile" -> "Emergency Contacts".
+2. You can add up to 5 contacts. Ensure the primary contact is listed first, as they will receive the initial SOS alerts.
+3. Verify phone numbers regularly to ensure alerts are delivered correctly.

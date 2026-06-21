@@ -58,7 +58,7 @@ logs/
 .pnpm-debug.log*
 
 # Database
-data/
+data/chroma/
 *.db
 *.mongodb
 dump/

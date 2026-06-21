@@ -1,0 +1,17 @@
+---
+topic: reassurance
+severity: medium
+audience: caregiver
+---
+# Reassurance Techniques
+
+## Validation Therapy
+Acknowledge the person's reality. If they are looking for a deceased spouse, instead of saying the spouse has passed away, ask them to tell you about the spouse.
+
+## Physical Comfort
+A gentle touch, holding hands, or a light hug can provide significant comfort and ground the person.
+
+## Reassuring Phrases
+- "You are safe here."
+- "I am here with you."
+- "We will figure this out together."

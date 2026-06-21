@@ -1,0 +1,16 @@
+---
+topic: medication
+severity: high
+audience: caregiver
+---
+# Managing Medications Safely
+
+## Organization
+- Use a pill organizer, divided by days and times.
+- Keep a detailed, up-to-date medication list, including dosages and purposes.
+- Store medications in a safe, dry place away from children and confused adults.
+
+## Tracking and Refills
+- Set alarms or use reminder apps to ensure timely administration.
+- Schedule refills well in advance so you never run out of essential medications.
+- Regularly review the medication list with a pharmacist or doctor.

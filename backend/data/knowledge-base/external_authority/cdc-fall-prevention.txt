@@ -1,0 +1,24 @@
+---
+topic: fall prevention
+severity: critical
+audience: both
+source_type: external_authority
+author_authority: Centers for Disease Control and Prevention (CDC)
+citation_url: https://www.cdc.gov/falls/index.html
+---
+# Preventing Falls Among Older Adults
+
+Falls are the leading cause of fatal and nonfatal injuries among older adults. For those with dementia, the risk is even higher due to cognitive and physical decline. However, falls are preventable and do not have to be an inevitable part of aging.
+
+## 4 Steps to Prevent Falls
+1. **Talk to your doctor**: Evaluate your risk for falling and discuss any recent falls. Ask your doctor or pharmacist to review your medications, both prescription and over-the-counter, to identify medicines that may cause side effects or interactions such as dizziness or drowsiness.
+2. **Do strength and balance exercises**: Exercises that improve leg strength and balance are critical. Tai Chi is highly recommended.
+3. **Have your eyes checked**: Have your eyes checked by an eye doctor at least once a year. Poor vision can increase your chances of falling. Update your glasses if needed.
+4. **Make your home safer**: 
+   - Remove tripping hazards (throw rugs, clutter) from walkways.
+   - Install grab bars inside and outside the tub or shower and next to the toilet.
+   - Put railings on both sides of the stairs.
+   - Ensure your home has lots of light.
+
+## What to do if a fall occurs
+Do not panic. Assess for injuries before attempting to get up. If you cannot get up, call for help immediately or use your emergency medical alert device. Do not move if you suspect a broken bone, especially in the hip or back.

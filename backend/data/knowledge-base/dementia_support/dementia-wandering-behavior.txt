@@ -1,0 +1,18 @@
+---
+topic: wandering
+severity: critical
+audience: caregiver
+---
+# Addressing Wandering Behavior
+
+## Why Wandering Happens
+Wandering is common in mid-to-late stage dementia. It can be caused by restlessness, a desire to fulfill a past obligation (like "going to work"), or searching for a familiar place.
+
+## Safety Measures
+- Install alarms on doors and windows.
+- Ensure the person wears a medical ID bracelet or a GPS tracker.
+- Keep a recent photograph and medical information ready in case they go missing.
+
+## Safe Exploration
+- Provide a safe, enclosed area for them to walk, such as a fenced garden.
+- Accompany them on daily walks to reduce pent-up energy.

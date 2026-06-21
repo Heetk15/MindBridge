@@ -1,0 +1,17 @@
+---
+topic: dashboard
+severity: low
+audience: caregiver
+---
+# Navigating the Caregiver Dashboard
+
+## Dashboard Overview
+The Caregiver Dashboard provides a centralized view of your loved one's status. It is accessed by logging into MindBridge with a Caregiver account.
+
+## Key Features
+- **Activity Log:** View recent actions, such as acknowledged reminders and game scores.
+- **Health Metrics:** If connected to compatible wearable devices, view heart rate and activity levels.
+- **Medication Adherence:** A weekly chart showing missed vs. taken medications.
+
+## Managing Access
+Caregivers can invite other family members to view the dashboard. Go to "Settings" -> "Family Access" to send an email invitation.
