@@ -27,14 +27,30 @@ class SimpleVectorStore {
 
     try {
       console.log('🔄 Loading transformer model (all-MiniLM-L6-v2)...')
+      
+      const memBefore = process.memoryUsage()
+      console.log(`[ONNX LOG] Memory before load: ${Math.round(memBefore.rss / 1024 / 1024)}MB RSS, ${Math.round(memBefore.heapUsed / 1024 / 1024)}MB Heap`)
+
       env.allowLocalModels = false // Use HuggingFace cache
       env.cacheDir = path.join(process.cwd(), '.cache', 'transformers')
       
+      // Attempt to verify the backend. If onnxruntime-node is installed, transformers.js uses it automatically.
+      try {
+        require('onnxruntime-node');
+        console.log(`[ONNX LOG] Backend verified: Native ONNX Runtime (onnxruntime-node) is available!`);
+      } catch (e) {
+        console.log(`[ONNX LOG] Backend warning: onnxruntime-node NOT found. Falling back to WASM. Error details:`, e);
+      }
+
       // Use lightweight all-MiniLM-L6-v2 model
       tokenizer = await AutoTokenizer.from_pretrained('Xenova/all-MiniLM-L6-v2')
       model = await AutoModel.from_pretrained('Xenova/all-MiniLM-L6-v2', {
         quantized: true, // Use quantized version for speed
       })
+      
+      const memAfter = process.memoryUsage()
+      console.log(`[ONNX LOG] Memory after load: ${Math.round(memAfter.rss / 1024 / 1024)}MB RSS, ${Math.round(memAfter.heapUsed / 1024 / 1024)}MB Heap`)
+      console.log(`[ONNX LOG] Memory difference: +${Math.round((memAfter.rss - memBefore.rss) / 1024 / 1024)}MB RSS`)
       
       console.log('✅ Transformer model loaded successfully')
     } catch (error) {
