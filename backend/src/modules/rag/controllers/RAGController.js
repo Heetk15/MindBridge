@@ -144,6 +144,7 @@ class RAGController {
           data_dir: null,
           data_chroma: null,
           knowledge_base: null,
+          caregiver_support: null
         },
         vector_store_exists: false
       }
@@ -151,11 +152,13 @@ class RAGController {
       const dataDir = path.join(process.cwd(), 'data')
       const chromaDir = path.join(dataDir, 'chroma')
       const kbDir = path.join(dataDir, 'knowledge-base')
+      const caregiverDir = path.join(kbDir, 'caregiver_support')
       const vectorStoreJson = path.join(chromaDir, 'vector-store.json')
 
       try { diagnostic.files.data_dir = fs.readdirSync(dataDir) } catch (e) { diagnostic.files.data_dir = e.message }
       try { diagnostic.files.data_chroma = fs.readdirSync(chromaDir) } catch (e) { diagnostic.files.data_chroma = e.message }
       try { diagnostic.files.knowledge_base = fs.readdirSync(kbDir) } catch (e) { diagnostic.files.knowledge_base = e.message }
+      try { diagnostic.files.caregiver_support = fs.readdirSync(caregiverDir) } catch (e) { diagnostic.files.caregiver_support = e.message }
       try { diagnostic.vector_store_exists = fs.existsSync(vectorStoreJson) } catch(e) {}
 
       res.json(diagnostic)
