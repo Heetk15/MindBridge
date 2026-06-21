@@ -220,7 +220,9 @@ class SimpleVectorStore {
       // Generate embedding for document
       let embedding = null
       try {
+        console.log(`[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation start`)
         embedding = await SimpleVectorStore.getEmbedding(documents[i])
+        console.log(`[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation success`)
         successCount++
         
         if (i < 2) {
@@ -228,6 +230,7 @@ class SimpleVectorStore {
         }
       } catch (error) {
         failCount++
+        console.error(`[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation failed! EXACT EXCEPTION:`, error.stack)
         console.warn(`  [ADD ${i}] Failed to embed "${ids[i]}":`, error.message)
       }
 

@@ -29,6 +29,7 @@ class DocumentIngestionService {
         
         // Chunk the document
         const chunks = this.chunkText(doc.content)
+        console.log(`[DIAGNOSTIC] Filename: ${doc.metadata.source} | Chunk count: ${chunks.length}`)
 
         for (let i = 0; i < chunks.length; i++) {
           const chunkId = `${doc.metadata.source}_chunk_${i}`

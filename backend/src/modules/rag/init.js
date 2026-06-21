@@ -59,14 +59,20 @@ async function initializeRAGModule() {
                 const filePath = path.join(categoryPath, docFile)
                 const content = await fs.readFile(filePath, 'utf-8')
                 
-                const result = await DocumentIngestionService.addDocument(content, {
-                  source: docFile,
-                  category: dir.name,
-                  date_added: new Date().toISOString(),
-                  tags: [dir.name],
-                })
-                
-                totalChunksLoaded += result.chunksAdded
+                try {
+                  const result = await DocumentIngestionService.addDocument(content, {
+                    source: docFile,
+                    category: dir.name,
+                    date_added: new Date().toISOString(),
+                    tags: [dir.name],
+                  })
+                  
+                  totalChunksLoaded += result.chunksAdded
+                } catch (docError) {
+                  console.error(`[DIAGNOSTIC] ❌ FAILED TO INGEST DOCUMENT: ${docFile}`)
+                  console.error(`[DIAGNOSTIC] EXACT EXCEPTION STACK:`, docError.stack)
+                  // Don't throw, let it continue so we can see which ones fail
+                }
               }
             }
           }
