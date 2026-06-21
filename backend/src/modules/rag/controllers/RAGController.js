@@ -161,6 +161,11 @@ class RAGController {
       try { diagnostic.files.caregiver_support = fs.readdirSync(caregiverDir) } catch (e) { diagnostic.files.caregiver_support = e.message }
       try { diagnostic.vector_store_exists = fs.existsSync(vectorStoreJson) } catch(e) {}
 
+      diagnostic.logs = {
+        ingestion_errors: global.RAG_DIAGNOSTIC_LOGS || [],
+        embedding_logs: global.RAG_EMBEDDING_LOGS || []
+      }
+
       res.json(diagnostic)
     } catch (error) {
       res.status(500).json({ error: error.message })

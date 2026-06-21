@@ -3,6 +3,9 @@ const DocumentIngestionService = require('./services/DocumentIngestionService')
 const fs = require('fs').promises
 const path = require('path')
 
+global.RAG_DIAGNOSTIC_LOGS = []
+global.RAG_EMBEDDING_LOGS = []
+
 /**
  * RAG Module Initializer
  * Called on server startup to initialize ChromaDB and load knowledge base
@@ -69,8 +72,9 @@ async function initializeRAGModule() {
                   
                   totalChunksLoaded += result.chunksAdded
                 } catch (docError) {
-                  console.error(`[DIAGNOSTIC] ❌ FAILED TO INGEST DOCUMENT: ${docFile}`)
-                  console.error(`[DIAGNOSTIC] EXACT EXCEPTION STACK:`, docError.stack)
+                  const errorLog = `[DIAGNOSTIC] ❌ FAILED TO INGEST DOCUMENT: ${docFile}\n[DIAGNOSTIC] EXACT EXCEPTION STACK: ${docError.stack}`
+                  console.error(errorLog)
+                  global.RAG_DIAGNOSTIC_LOGS.push({ file: docFile, error: docError.message, stack: docError.stack })
                   // Don't throw, let it continue so we can see which ones fail
                 }
               }

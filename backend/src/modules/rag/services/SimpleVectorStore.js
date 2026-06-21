@@ -220,9 +220,16 @@ class SimpleVectorStore {
       // Generate embedding for document
       let embedding = null
       try {
-        console.log(`[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation start`)
+        const startLog = `[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation start`
+        console.log(startLog)
+        if (global.RAG_EMBEDDING_LOGS) global.RAG_EMBEDDING_LOGS.push(startLog)
+        
         embedding = await SimpleVectorStore.getEmbedding(documents[i])
-        console.log(`[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation success`)
+        
+        const successLog = `[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation success`
+        console.log(successLog)
+        if (global.RAG_EMBEDDING_LOGS) global.RAG_EMBEDDING_LOGS.push(successLog)
+        
         successCount++
         
         if (i < 2) {
@@ -230,7 +237,9 @@ class SimpleVectorStore {
         }
       } catch (error) {
         failCount++
-        console.error(`[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation failed! EXACT EXCEPTION:`, error.stack)
+        const failLog = `[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation failed! EXACT EXCEPTION: ${error.stack}`
+        console.error(failLog)
+        if (global.RAG_EMBEDDING_LOGS) global.RAG_EMBEDDING_LOGS.push(failLog)
         console.warn(`  [ADD ${i}] Failed to embed "${ids[i]}":`, error.message)
       }
 
