@@ -50,6 +50,12 @@ router.post('/tags', RAGController.searchByTags)
 router.get('/stats', RAGController.getStats)
 
 /**
+ * GET /api/rag/diagnostic
+ * Get exact evidence of file system and env for Render root cause
+ */
+router.get('/diagnostic', RAGController.getDiagnostic)
+
+/**
  * POST /api/rag/upload
  * Upload text or PDF to knowledge base
  */

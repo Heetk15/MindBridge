@@ -128,6 +128,43 @@ class RAGController {
   }
 
   /**
+   * Diagnostic endpoint for Render production RAG failure root cause
+   */
+  static async getDiagnostic(req, res) {
+    try {
+      const fs = require('fs')
+      
+      const diagnostic = {
+        cwd: process.cwd(),
+        node_env: process.env.NODE_ENV,
+        rag_enabled: process.env.RAG_ENABLED,
+        vector_backend: process.env.VECTOR_STORE_BACKEND,
+        chroma_url: process.env.CHROMA_URL,
+        files: {
+          data_dir: null,
+          data_chroma: null,
+          knowledge_base: null,
+        },
+        vector_store_exists: false
+      }
+
+      const dataDir = path.join(process.cwd(), 'data')
+      const chromaDir = path.join(dataDir, 'chroma')
+      const kbDir = path.join(dataDir, 'knowledge-base')
+      const vectorStoreJson = path.join(chromaDir, 'vector-store.json')
+
+      try { diagnostic.files.data_dir = fs.readdirSync(dataDir) } catch (e) { diagnostic.files.data_dir = e.message }
+      try { diagnostic.files.data_chroma = fs.readdirSync(chromaDir) } catch (e) { diagnostic.files.data_chroma = e.message }
+      try { diagnostic.files.knowledge_base = fs.readdirSync(kbDir) } catch (e) { diagnostic.files.knowledge_base = e.message }
+      try { diagnostic.vector_store_exists = fs.existsSync(vectorStoreJson) } catch(e) {}
+
+      res.json(diagnostic)
+    } catch (error) {
+      res.status(500).json({ error: error.message })
+    }
+  }
+
+  /**
    * Initialize with sample data
    * POST /api/rag/init-samples
    */
