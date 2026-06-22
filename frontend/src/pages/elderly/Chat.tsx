@@ -24,7 +24,7 @@ import KnowledgeBaseModal from '../../components/chatbot/KnowledgeBaseModal'
 import EmergencyBanner from '../../components/emergency/EmergencyBanner'
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
 
-const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5004/api`
+const API_URL = import.meta.env.VITE_API_URL; // Must be defined in production
 
 const LANGUAGES = [
   { code: 'auto', label: 'Auto-detect', flag: '🌐', ttsLang: '' },
