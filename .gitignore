@@ -59,6 +59,8 @@ logs/
 
 # Database
 data/chroma/
+backend/data/chroma/
+backend/server/data/chroma/
 *.db
 *.mongodb
 dump/
