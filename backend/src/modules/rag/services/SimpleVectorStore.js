@@ -27,28 +27,37 @@ class SimpleVectorStore {
 
     try {
       console.log('🔄 Loading transformer model (all-MiniLM-L6-v2)...')
-      
 
-
-      env.allowLocalModels = false // Use HuggingFace cache
+      env.allowLocalModels = false
       env.cacheDir = path.join(process.cwd(), '.cache', 'transformers')
-      
-      // Attempt to verify the backend. If onnxruntime-node is installed, transformers.js uses it automatically.
-        require('onnxruntime-node');
+
+      // Check if native ONNX runtime is available
+      try {
+        require('onnxruntime-node')
+        console.log('✅ Native ONNX Runtime detected')
       } catch (e) {
-        // Fallback to WASM
+        console.log('⚠️ onnxruntime-node not found, using WASM backend')
       }
 
-      // Use lightweight all-MiniLM-L6-v2 model
-      tokenizer = await AutoTokenizer.from_pretrained('Xenova/all-MiniLM-L6-v2')
-      model = await AutoModel.from_pretrained('Xenova/all-MiniLM-L6-v2', {
-        quantized: true, // Use quantized version for speed
-      })
-      
+      // Load tokenizer
+      tokenizer = await AutoTokenizer.from_pretrained(
+        'Xenova/all-MiniLM-L6-v2'
+      )
+
+      // Load model
+      model = await AutoModel.from_pretrained(
+        'Xenova/all-MiniLM-L6-v2',
+        {
+          quantized: true,
+        }
+      )
 
       console.log('✅ Transformer model loaded successfully')
     } catch (error) {
-      console.error('❌ Failed to load transformer model:', error.message)
+      console.error(
+        '❌ Failed to load transformer model:',
+        error.message
+      )
       throw error
     }
   }
