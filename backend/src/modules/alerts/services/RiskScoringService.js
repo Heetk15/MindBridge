@@ -124,7 +124,7 @@ class RiskScoringService {
    * @returns {Promise<{ intents: string[], confidence: number }>}
    */
   static async classifyIntent(_message) {
-    // TODO: Call LLM API here (e.g. Groq, OpenAI) for deeper intent analysis
+
     return { intents: [], confidence: 0 }
   }
 

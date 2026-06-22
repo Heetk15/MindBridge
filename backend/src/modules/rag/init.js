@@ -3,7 +3,7 @@ const DocumentIngestionService = require('./services/DocumentIngestionService')
 const fs = require('fs').promises
 const path = require('path')
 
-global.RAG_DIAGNOSTIC_LOGS = []
+
 global.RAG_EMBEDDING_LOGS = []
 
 /**
@@ -72,9 +72,7 @@ async function initializeRAGModule() {
                   
                   totalChunksLoaded += result.chunksAdded
                 } catch (docError) {
-                  const errorLog = `[DIAGNOSTIC] ❌ FAILED TO INGEST DOCUMENT: ${docFile}\n[DIAGNOSTIC] EXACT EXCEPTION STACK: ${docError.stack}`
-                  console.error(errorLog)
-                  global.RAG_DIAGNOSTIC_LOGS.push({ file: docFile, error: docError.message, stack: docError.stack })
+                  console.error(`❌ FAILED TO INGEST DOCUMENT: ${docFile}`, docError.message)
                   // Don't throw, let it continue so we can see which ones fail
                 }
               }

@@ -28,18 +28,15 @@ class SimpleVectorStore {
     try {
       console.log('🔄 Loading transformer model (all-MiniLM-L6-v2)...')
       
-      const memBefore = process.memoryUsage()
-      console.log(`[ONNX LOG] Memory before load: ${Math.round(memBefore.rss / 1024 / 1024)}MB RSS, ${Math.round(memBefore.heapUsed / 1024 / 1024)}MB Heap`)
+
 
       env.allowLocalModels = false // Use HuggingFace cache
       env.cacheDir = path.join(process.cwd(), '.cache', 'transformers')
       
       // Attempt to verify the backend. If onnxruntime-node is installed, transformers.js uses it automatically.
-      try {
         require('onnxruntime-node');
-        console.log(`[ONNX LOG] Backend verified: Native ONNX Runtime (onnxruntime-node) is available!`);
       } catch (e) {
-        console.log(`[ONNX LOG] Backend warning: onnxruntime-node NOT found. Falling back to WASM. Error details:`, e);
+        // Fallback to WASM
       }
 
       // Use lightweight all-MiniLM-L6-v2 model
@@ -48,10 +45,7 @@ class SimpleVectorStore {
         quantized: true, // Use quantized version for speed
       })
       
-      const memAfter = process.memoryUsage()
-      console.log(`[ONNX LOG] Memory after load: ${Math.round(memAfter.rss / 1024 / 1024)}MB RSS, ${Math.round(memAfter.heapUsed / 1024 / 1024)}MB Heap`)
-      console.log(`[ONNX LOG] Memory difference: +${Math.round((memAfter.rss - memBefore.rss) / 1024 / 1024)}MB RSS`)
-      
+
       console.log('✅ Transformer model loaded successfully')
     } catch (error) {
       console.error('❌ Failed to load transformer model:', error.message)
@@ -115,11 +109,7 @@ class SimpleVectorStore {
       // Cache it
       embeddingCache[text] = normalized
       
-      // Debug log first embedding
-      if (Object.keys(embeddingCache).length === 1) {
-        console.log(`[EMBEDDING DEBUG] First embedding for "${text.substring(0, 30)}...": norm=${norm.toFixed(4)}, dims=${normalized.length}, tokens=${tokenCount}`)
-        console.log(`  First 5 values: [${normalized.slice(0, 5).map(v => v.toFixed(4)).join(', ')}]`)
-      }
+
 
       return normalized
     } catch (error) {
@@ -133,7 +123,6 @@ class SimpleVectorStore {
    */
   static cosineSimilarity(a, b) {
     if (!a || !b || a.length !== b.length) {
-      console.warn(`[SIM DEBUG] Invalid embeddings: a=${a?.length}, b=${b?.length}`)
       return 0
     }
 
@@ -149,7 +138,6 @@ class SimpleVectorStore {
 
     const denominator = Math.sqrt(normA) * Math.sqrt(normB)
     if (denominator === 0) {
-      console.warn(`[SIM DEBUG] Zero denominator: normA=${normA}, normB=${normB}`)
       return 0
     }
 
@@ -228,7 +216,7 @@ class SimpleVectorStore {
    * Add documents to store with embeddings
    */
   async add(ids, documents, metadatas) {
-    console.log(`\n[ADD DEBUG] Starting to add ${ids.length} documents`)
+
     let successCount = 0
     let failCount = 0
 
@@ -236,26 +224,10 @@ class SimpleVectorStore {
       // Generate embedding for document
       let embedding = null
       try {
-        const startLog = `[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation start`
-        console.log(startLog)
-        if (global.RAG_EMBEDDING_LOGS) global.RAG_EMBEDDING_LOGS.push(startLog)
-        
         embedding = await SimpleVectorStore.getEmbedding(documents[i])
-        
-        const successLog = `[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation success`
-        console.log(successLog)
-        if (global.RAG_EMBEDDING_LOGS) global.RAG_EMBEDDING_LOGS.push(successLog)
-        
         successCount++
-        
-        if (i < 2) {
-          console.log(`  [ADD ${i}] "${ids[i]}": embedding generated, dims=${embedding?.length}`)
-        }
       } catch (error) {
         failCount++
-        const failLog = `[DIAGNOSTIC] Filename: ${metadatas[i].source} | Chunk: ${i} | Embedding generation failed! EXACT EXCEPTION: ${error.stack}`
-        console.error(failLog)
-        if (global.RAG_EMBEDDING_LOGS) global.RAG_EMBEDDING_LOGS.push(failLog)
         console.warn(`  [ADD ${i}] Failed to embed "${ids[i]}":`, error.message)
       }
 
@@ -271,7 +243,7 @@ class SimpleVectorStore {
       }
     }
 
-    console.log(`[ADD DEBUG] Completed: ${successCount} success, ${failCount} failed`)
+
     await this.save()
   }
 
@@ -348,9 +320,7 @@ class SimpleVectorStore {
     try {
       queryEmbedding = await SimpleVectorStore.getEmbedding(query)
       
-      console.log(`\n[DEBUG] Query embedding generated (${queryEmbedding ? queryEmbedding.length : 0} dims)`)
-      console.log(`[DEBUG] Total documents in store: ${this.documents.length}`)
-      
+
       const scored = this.documents.map((doc) => {
         let similarity = 0
         if (doc.embedding && queryEmbedding) {
@@ -361,10 +331,6 @@ class SimpleVectorStore {
       
       // Sort and log top 5 for debugging
       const sorted = scored.sort((a, b) => b.similarity - a.similarity)
-      console.log(`[DEBUG] Top 5 similarity scores:`)
-      sorted.slice(0, 5).forEach((r, i) => {
-        console.log(`  ${i+1}. "${r.metadata?.source}" (chunk ${r.metadata?.chunk_index}): ${(r.similarity*100).toFixed(2)}% - "${r.content.substring(0, 50).replace(/\n/g, ' ')}..."`)
-      })
 
       semanticResults = sorted
         .filter(r => r.similarity > 0.15) // Lower threshold for semantic
@@ -417,10 +383,7 @@ class SimpleVectorStore {
       .sort((a, b) => b.score - a.score)
       .slice(0, nResults)
 
-    console.log(`[HYBRID DEBUG] Final top ${results.length} results:`)
-    results.forEach((r, i) => {
-      console.log(`  ${i+1}. "${r.metadata?.source}" chunk=${r.metadata?.chunk_index} | sem=${r.semanticSim.toFixed(3)} kw=${r.keywordScore.toFixed(3)} combined=${r.score.toFixed(3)}`)
-    })
+
 
     return {
       ids: [results.map((r) => r.id)],

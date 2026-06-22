@@ -146,17 +146,7 @@ class ChatbotController {
 
       EmergencyDetectionService.processAutoEscalations().catch(() => {})
 
-      // ── Retrieval Logging (Observability) ──
-      const categories = [...new Set(ragDocs.map(d => d.metadata?.category).filter(Boolean))];
-      const scores = ragDocs.map(d => Number(d.similarity || d.score || 0));
 
-      console.log(`[Retrieval Observability]`, JSON.stringify({
-        query: message,
-        intent: intentMode,
-        chunksReturned: ragDocs.length,
-        categories: categories,
-        scores: scores
-      }, null, 2))
 
       // ── Persist both messages to MongoDB ──
       if (conversationId && mongoose.Types.ObjectId.isValid(conversationId)) {

@@ -1,0 +1,359 @@
+[
+  {
+    "id": "health-guidelines.txt_chunk_0",
+    "content": "\n          # Elderly Health and Wellness Guide\n          \n          ## Regular Health Checkups\n          Regular health checkups are essential for maintaining good health. It's recommended that seniors have:\n          - Annual physical examinations\n          - Blood pressure monitoring\n          - Cholesterol screening\n          - Vision and hearing tests\n          \n          ## Nutrition Tips for Seniors\n          - Eat a balanced diet with plenty of fruits and vegetables\n          - Stay hydra",
+    "metadata": {
+      "source": "health-guidelines.txt",
+      "category": "health",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "health",
+        "wellness",
+        "elderly",
+        "nutrition"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 2
+    }
+  },
+  {
+    "id": "health-guidelines.txt_chunk_1",
+    "content": " Seniors\n          - Eat a balanced diet with plenty of fruits and vegetables\n          - Stay hydrated by drinking plenty of water\n          - Include lean proteins for muscle health\n          - Limit salt and sugar intake\n          - Take vitamins as recommended by your doctor\n        ",
+    "metadata": {
+      "source": "health-guidelines.txt",
+      "category": "health",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "health",
+        "wellness",
+        "elderly",
+        "nutrition"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 2
+    }
+  },
+  {
+    "id": "cognitive-health.txt_chunk_0",
+    "content": "\n          # Memory and Cognitive Health\n          \n          ## Brain Exercises\n          Keep your mind sharp with these activities:\n          - Reading newspapers and books\n          - Playing chess, puzzles, or card games\n          - Learning new skills or hobbies\n          - Engaging in meaningful conversations\n          - Solving crossword puzzles\n          - Painting or drawing\n          \n          ## Social Connections\n          Social interaction is crucial for mental health:\n          ",
+    "metadata": {
+      "source": "cognitive-health.txt",
+      "category": "mental-health",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "mental-health",
+        "cognitive",
+        "exercises",
+        "social"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 2
+    }
+  },
+  {
+    "id": "cognitive-health.txt_chunk_1",
+    "content": "         ## Social Connections\n          Social interaction is crucial for mental health:\n          - Join community groups or clubs\n          - Spend time with family and friends\n          - Participate in group activities\n          - Volunteer in your community\n          - Take classes or join workshops\n        ",
+    "metadata": {
+      "source": "cognitive-health.txt",
+      "category": "mental-health",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "mental-health",
+        "cognitive",
+        "exercises",
+        "social"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 2
+    }
+  },
+  {
+    "id": "physical-activity.txt_chunk_0",
+    "content": "\n          # Physical Activity for Seniors\n          \n          ## Safe Exercise Guidelines\n          Before starting any exercise program:\n          - Consult with your doctor\n          - Start slowly and gradually increase intensity\n          - Warm up before exercising\n          - Cool down after exercising\n          - Stay hydrated during exercise\n          \n          ## Recommended Activities\n          - Walking (30 minutes daily if possible)\n          - Swimming or water aerobics\n         ",
+    "metadata": {
+      "source": "physical-activity.txt",
+      "category": "fitness",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "fitness",
+        "exercise",
+        "safety",
+        "health"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "physical-activity.txt_chunk_1",
+    "content": "\n          - Walking (30 minutes daily if possible)\n          - Swimming or water aerobics\n          - Yoga or tai chi for balance and flexibility\n          - Light resistance training with proper form\n          - Dancing\n          - Gardening\n          \n          ## Fall Prevention\n          - Keep floors clear of hazards\n          - Ensure good lighting\n          - Install grab bars in bathrooms\n          - Wear appropriate footwear\n          - Consider vision and hearing checks\n        ",
+    "metadata": {
+      "source": "physical-activity.txt",
+      "category": "fitness",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "fitness",
+        "exercise",
+        "safety",
+        "health"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "physical-activity.txt_chunk_2",
+    "content": "\n          - Wear appropriate footwear\n          - Consider vision and hearing checks\n        ",
+    "metadata": {
+      "source": "physical-activity.txt",
+      "category": "fitness",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "fitness",
+        "exercise",
+        "safety",
+        "health"
+      ],
+      "chunk_index": 2,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "sleep-guide.txt_chunk_0",
+    "content": "\n          # Sleep Tips for Seniors\n          \n          ## Healthy Sleep Habits\n          - Maintain a consistent sleep schedule\n          - Create a comfortable sleep environment\n          - Keep bedroom cool, dark, and quiet\n          - Avoid screens 1 hour before bedtime\n          - Limit caffeine intake\n          - Avoid heavy meals before sleeping\n          \n          ## Sleep Disorders\n          Common sleep issues in seniors:\n          - Insomnia\n          - Sleep apnea\n          - Restl",
+    "metadata": {
+      "source": "sleep-guide.txt",
+      "category": "wellness",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "sleep",
+        "wellness",
+        "rest",
+        "health"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 2
+    }
+  },
+  {
+    "id": "sleep-guide.txt_chunk_1",
+    "content": "      Common sleep issues in seniors:\n          - Insomnia\n          - Sleep apnea\n          - Restless leg syndrome\n          \n          Consult a doctor if sleep problems persist.\n        ",
+    "metadata": {
+      "source": "sleep-guide.txt",
+      "category": "wellness",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "sleep",
+        "wellness",
+        "rest",
+        "health"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 2
+    }
+  },
+  {
+    "id": "family-relationships.txt_chunk_0",
+    "content": "\n          # Family Relationships and Communication\n          \n          ## Building Strong Family Bonds\n          Family relationships are essential for emotional well-being:\n          - Schedule regular family calls and visits\n          - Share stories and memories with grandchildren\n          - Plan family gatherings and celebrations\n          - Create new traditions with loved ones\n          - Express love and appreciation to family members\n          \n          ## Technology for Family Conne",
+    "metadata": {
+      "source": "family-relationships.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "relationships",
+        "communication",
+        "social"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "family-relationships.txt_chunk_1",
+    "content": " Express love and appreciation to family members\n          \n          ## Technology for Family Connection\n          Stay connected with family using:\n          - Video calling apps (WhatsApp, Zoom, FaceTime)\n          - Email and messaging\n          - Social media to see family updates\n          - Family group chats to stay in touch\n          \n          ## Extended Family Care\n          Maintaining relationships with:\n          - Grandchildren - spend quality time, listen to their stories\n      ",
+    "metadata": {
+      "source": "family-relationships.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "relationships",
+        "communication",
+        "social"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "family-relationships.txt_chunk_2",
+    "content": "g relationships with:\n          - Grandchildren - spend quality time, listen to their stories\n          - Adult children - share your wisdom and experience\n          - Siblings and cousins - organize reunions\n          - In-laws - foster positive relationships\n          - Close family friends - maintain these valuable connections\n        ",
+    "metadata": {
+      "source": "family-relationships.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "relationships",
+        "communication",
+        "social"
+      ],
+      "chunk_index": 2,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "caregiving-family.txt_chunk_0",
+    "content": "\n          # Caregiving: For and From Family Members\n          \n          ## When Your Family Provides Care\n          - Communicate your needs clearly and appreciatively\n          - Maintain independence in activities you can do\n          - Respect caregivers' time and effort\n          - Have regular conversations about care preferences\n          - Express gratitude regularly\n          \n          ## Family Caregiving Support\n          If you're caring for a family member:\n          - Take regula",
+    "metadata": {
+      "source": "caregiving-family.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "caregiving",
+        "relationships",
+        "support"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "caregiving-family.txt_chunk_1",
+    "content": "## Family Caregiving Support\n          If you're caring for a family member:\n          - Take regular breaks to prevent burnout\n          - Ask other family members for help\n          - Stay organized with medical records and schedules\n          - Learn about available resources and support groups\n          - Don't hesitate to seek professional help\n          \n          ## Multi-Generational Households\n          Living with family members:\n          - Establish clear routines and expectations\n  ",
+    "metadata": {
+      "source": "caregiving-family.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "caregiving",
+        "relationships",
+        "support"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "caregiving-family.txt_chunk_2",
+    "content": "holds\n          Living with family members:\n          - Establish clear routines and expectations\n          - Respect each other's privacy and space\n          - Have regular family meetings\n          - Share household responsibilities fairly\n          - Celebrate together and support during challenges\n        ",
+    "metadata": {
+      "source": "caregiving-family.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "caregiving",
+        "relationships",
+        "support"
+      ],
+      "chunk_index": 2,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "grandparenting-legacy.txt_chunk_0",
+    "content": "\n          # Legacy, Grandparenting and Passing on Wisdom\n          \n          ## The Role of Grandparents\n          As a grandparent, you can:\n          - Share family history and cultural traditions\n          - Provide unconditional love and support\n          - Teach life lessons through stories and experiences\n          - Be a mentor and role model\n          - Create lasting memories\n          \n          ## Passing Down Family Values\n          How to transmit values to younger generations:\n  ",
+    "metadata": {
+      "source": "grandparenting-legacy.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "grandparenting",
+        "legacy",
+        "wisdom"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "grandparenting-legacy.txt_chunk_1",
+    "content": "\n          ## Passing Down Family Values\n          How to transmit values to younger generations:\n          - Tell family stories and traditions\n          - Share recipes and prepare meals together\n          - Teach crafts, gardening, or other hobbies\n          - Discuss family principles and beliefs\n          - Set a good example through your actions\n          \n          ## Creating a Legacy\n          Something for future generations:\n          - Write a family memoir or journal\n          - Rec",
+    "metadata": {
+      "source": "grandparenting-legacy.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "grandparenting",
+        "legacy",
+        "wisdom"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "grandparenting-legacy.txt_chunk_2",
+    "content": "      Something for future generations:\n          - Write a family memoir or journal\n          - Record audio/video messages\n          - Organize old photographs with stories\n          - Create a family tree\n          - Donate to causes you believe in\n          - Share life advice and wisdom\n          - Leave a letter for grandchildren to open later\n        ",
+    "metadata": {
+      "source": "grandparenting-legacy.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "grandparenting",
+        "legacy",
+        "wisdom"
+      ],
+      "chunk_index": 2,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "family-financial-planning.txt_chunk_0",
+    "content": "\n          # Managing Family Finances and Planning\n          \n          ## Financial Planning for Seniors\n          Important financial considerations:\n          - Keep organized records of all accounts\n          - Create or update your will and living will\n          - Discuss financial plans with family\n          - Plan for healthcare costs\n          - Review insurance policies regularly\n          \n          ## Involving Family in Financial Decisions\n          - Inform trusted family members ab",
+    "metadata": {
+      "source": "family-financial-planning.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "finances",
+        "planning",
+        "estate"
+      ],
+      "chunk_index": 0,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "family-financial-planning.txt_chunk_1",
+    "content": "  \n          ## Involving Family in Financial Decisions\n          - Inform trusted family members about accounts\n          - Choose a financial power of attorney\n          - Keep important documents in safe place\n          - Discuss inheritance with family\n          - Consider family meetings about finances\n          \n          ## Estate Planning Basics\n          Planning for future generations:\n          - Identify what you want to leave behind\n          - Organize important documents and passw",
+    "metadata": {
+      "source": "family-financial-planning.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "finances",
+        "planning",
+        "estate"
+      ],
+      "chunk_index": 1,
+      "total_chunks": 3
+    }
+  },
+  {
+    "id": "family-financial-planning.txt_chunk_2",
+    "content": "         - Identify what you want to leave behind\n          - Organize important documents and passwords\n          - Consider tax implications\n          - Update beneficiaries on insurance/retirement\n          - Ensure someone knows where records are kept\n          - Consult with a lawyer or financial advisor\n        ",
+    "metadata": {
+      "source": "family-financial-planning.txt",
+      "category": "family",
+      "date_added": "2026-02-28T12:41:11.922Z",
+      "tags": [
+        "family",
+        "finances",
+        "planning",
+        "estate"
+      ],
+      "chunk_index": 2,
+      "total_chunks": 3
+    }
+  }
+]
