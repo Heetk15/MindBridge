@@ -26,9 +26,6 @@ const startServer = async () => {
     // Connect to MongoDB
     await connectDB()
 
-    // Initialize RAG module
-    await initializeRAGModule()
-
     // Create HTTP server from Express app
     server = http.createServer(app)
 
@@ -69,6 +66,17 @@ const startServer = async () => {
       console.log(`💾 Database: Connected`)
       console.log(`🔌 Socket.io: Ready for video call signaling`)
       console.log(`🌐 LAN Access: http://<your-ip>:${PORT}`)
+
+      // Initialize RAG asynchronously after server binds to port
+      global.IS_RAG_READY = false
+      initializeRAGModule()
+        .then(() => {
+          global.IS_RAG_READY = true
+          console.log('✅ RAG Module Ready')
+        })
+        .catch(err => {
+          console.error('❌ RAG Module Failed', err)
+        })
     })
 
     // Handle graceful shutdown

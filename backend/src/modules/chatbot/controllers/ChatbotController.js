@@ -109,6 +109,10 @@ class ChatbotController {
         return res.status(503).json({ error: 'AI service not configured' })
       }
 
+      if (global.IS_RAG_READY === false) {
+        return res.status(503).json({ error: 'Knowledge base is still initializing. Please wait a moment and try again.' })
+      }
+
       // ── Context ──
       const startTime = Date.now()
       const context = getContext(conversationId)
